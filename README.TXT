@@ -15,10 +15,10 @@ AUTORES / DESENVOLVEDORES
 
 CODIGO DE VERSIONAMENTO (COMMIT ATUAL)
 ---------------------------------------
-Commit Hash: fa2fbae3a66092ad7e79d83b7f4d98f351692dd7
-Commit Curto: fa2fbae
-Data/Hora: Mon Oct 26 23:34:12 2026 -0300
-Link Direto: https://github.com/Jubsvf/Pagina-ADM---Financeiro/commit/fa2fbae3a66092ad7e79d83b7f4d98f351692dd7
+Commit Hash: 536663c84bc4ad3613cd9a54abfff81235219688
+Commit Curto: 536663c
+Data/Hora: Mon Oct 26 23:40:52 2026 -0300
+Link Direto: https://github.com/Jubsvf/Pagina-ADM---Financeiro/commit/536663c84bc4ad3613cd9a54abfff81235219688
 
 HISTORICO DE VERSOES (COMMITS)
 -------------------------------
