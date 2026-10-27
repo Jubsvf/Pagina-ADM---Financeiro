@@ -1,5 +1,5 @@
 """
-Ponto de entrada padrão para servidores WSGI (como Gunicorn no Render).
+Ponto de entrada padrão para a aplicação (compatível com Vercel Serverless e WSGI local).
 Importa a aplicação Flask configurada em server.py.
 """
 from server import app

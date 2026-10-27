@@ -57,7 +57,7 @@ O **FinTrack** une a administração financeira operacional ao poder da IA gener
 - **Driver de Conexão**: `psycopg` (v3) e `psycopg2-binary`
 - **Inteligência Artificial**: Google Gemini API (`google-genai`) & `pypdf`
 - **Frontend**: HTML5 Semântico, CSS3 Moderno (Glassmorphism, responsividade), JavaScript Vanilla
-- **Deploy**: Preparado para Render / WSGI (Gunicorn)
+- **Deploy**: Configurado para Vercel Serverless (`vercel.json`)
 
 ---
 
