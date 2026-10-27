@@ -104,7 +104,7 @@
 
     // Versão Git no Rodapé da Sidebar
     const gitBadge = document.getElementById('sidebarGitHash');
-    if (gitBadge && gitBadge.textContent === '12c68a') {
+    if (gitBadge) {
       fetch('/api/version')
         .then(r => r.json())
         .then(d => {

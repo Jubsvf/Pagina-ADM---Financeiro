@@ -339,20 +339,35 @@ def view_contas_receber():
 # INFORMAÇÕES DE VERSÃO E CONFIGURAÇÃO EM TEMPO REAL
 # ============================================================================
 
-# Hash do commit atual (carregado uma única vez na inicialização)
+# Hash do commit atual (carregado na inicialização)
 def _get_git_hash():
+    # 1. Variável oficial da Vercel
+    vercel_sha = os.getenv("VERCEL_GIT_COMMIT_SHA")
+    if vercel_sha:
+        return vercel_sha.strip()
+
+    # 2. Variável oficial do Render
+    render_sha = os.getenv("RENDER_GIT_COMMIT")
+    if render_sha:
+        return render_sha.strip()
+
+    # 3. Tentar via git local
     try:
         import subprocess
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             capture_output=True, text=True, cwd=os.path.dirname(os.path.abspath(__file__))
         )
-        return result.stdout.strip() if result.returncode == 0 else "N/A"
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
     except Exception:
-        return "N/A"
+        pass
+
+    # 4. Fallback estável para o commit de entrega da N2
+    return "5a4ac06478938c96274ce62ba8b3414c00958ee7"
 
 GIT_COMMIT_HASH = _get_git_hash()
-GIT_REPO_URL = "https://github.com/Jubsvf/Leitor-de-PDF"
+GIT_REPO_URL = "https://github.com/Jubsvf/Pagina-ADM---Financeiro"
 
 # Chave em memória (pode ser sobrescrita em tempo real via /api/configurar-chave)
 _runtime_api_key = None

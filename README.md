@@ -1,4 +1,4 @@
-# FinTrack - Sistema de Gestão Financeira & Leitor de Nota Fiscal com IA
+# AgroFinanceiro N2 - Sistema de Gestão Financeira & Leitor de Nota Fiscal com IA
 
 Sistema web completo para gestão financeira e processamento inteligente de documentos fiscais em PDF, integrando Inteligência Artificial (Google Gemini) para leitura automática, classificação de despesas e rotinas financeiras completas (Contas a Pagar e a Receber).
 
@@ -6,7 +6,7 @@ Sistema web completo para gestão financeira e processamento inteligente de docu
 
 ## 📌 Sobre o Projeto
 
-O **FinTrack** une a administração financeira operacional ao poder da IA generativa. Além de permitir a extração e estruturação automática de dados de faturas/notas fiscais a partir de arquivos PDF, o sistema oferece um painel administrativo completo para controle de fornecedores, clientes, faturados, categorias orçamentárias e lançamentos parcelados.
+O **AgroFinanceiro** une a administração financeira operacional ao poder da IA generativa. Além de permitir a extração e estruturação automática de dados de faturas/notas fiscais a partir de arquivos PDF, o sistema oferece um painel administrativo completo para controle de fornecedores, clientes, faturados, categorias orçamentárias e lançamentos parcelados.
 
 ---
 
@@ -52,12 +52,12 @@ O **FinTrack** une a administração financeira operacional ao poder da IA gener
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Backend**: Python 3.10+, Flask, Flask-CORS, Flasgger
-- **Banco de Dados**: SQLAlchemy ORM (compatível com PostgreSQL em produção e SQLite em desenvolvimento)
+- **Backend**: Python 3.11+, Flask, Flask-CORS, Flasgger
+- **Banco de Dados**: SQLAlchemy ORM (PostgreSQL em produção via Render, SQLite em desenvolvimento local)
 - **Driver de Conexão**: `psycopg` (v3) e `psycopg2-binary`
 - **Inteligência Artificial**: Google Gemini API (`google-genai`) & `pypdf`
 - **Frontend**: HTML5 Semântico, CSS3 Moderno (Glassmorphism, responsividade), JavaScript Vanilla
-- **Deploy**: Configurado para Vercel Serverless (`vercel.json`)
+- **Deploy**: Configurado para **Render** (`render.yaml`) com PostgreSQL persistente
 
 ---
 
@@ -97,7 +97,6 @@ SECRET_KEY=sua_chave_secreta
 ```bash
 python app.py
 ```
-*(ou `python server.py`)*
 
 O sistema inicializará as tabelas e o seed padrão automaticamente, ficando disponível em:
 👉 **http://127.0.0.1:5000**
@@ -109,6 +108,19 @@ O sistema inicializará as tabelas e o seed padrão automaticamente, ficando dis
 - **URL de Login**: [http://127.0.0.1:5000/login](http://127.0.0.1:5000/login)
 - **Usuário**: `admin`
 - **Senha**: `fintrack2025`
+
+---
+
+## ☁️ Deploy no Render
+
+O projeto está configurado para deploy no **Render** com banco de dados PostgreSQL persistente:
+
+1. Crie um serviço **Web Service** no [Render.com](https://render.com) apontando para este repositório.
+2. O comando de inicialização é: `gunicorn --chdir . server:app`
+3. Configure as variáveis de ambiente no painel do Render:
+   - `DATABASE_URL` — URL de conexão do PostgreSQL (gerado automaticamente pelo Render PostgreSQL)
+   - `GEMINI_API_KEY` — Chave da API do Google Gemini
+   - `SECRET_KEY` — Chave secreta para sessões Flask
 
 ---
 
@@ -127,3 +139,4 @@ O sistema inicializará as tabelas e o seed padrão automaticamente, ficando dis
 | `/contas-pagar` | Movimentação e parcelamento de Contas a Pagar |
 | `/contas-receber` | Movimentação e parcelamento de Contas a Receber |
 | `/apidocs` | Documentação interativa Swagger/OpenAPI |
+
