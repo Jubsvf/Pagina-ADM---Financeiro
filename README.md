@@ -1,130 +1,129 @@
-# Leitor de Nota Fiscal (Extração de Dados em PDF)
+# FinTrack - Sistema de Gestão Financeira & Leitor de Nota Fiscal com IA
 
-Aplicação web desenvolvida para atividade prática acadêmica, projetada para fornecer uma interface limpa, intuitiva e direta para o upload de notas fiscais em formato PDF, preparando o arquivo para futura extração automatizada de dados utilizando Inteligência Artificial.
+Sistema web completo para gestão financeira e processamento inteligente de documentos fiscais em PDF, integrando Inteligência Artificial (Google Gemini) para leitura automática, classificação de despesas e rotinas financeiras completas (Contas a Pagar e a Receber).
 
 ---
 
 ## 📌 Sobre o Projeto
 
-O objetivo deste projeto é servir como camada de entrada (frontend) para um fluxo de processamento inteligente de documentos fiscais. A interface permite que o usuário selecione um arquivo PDF de nota fiscal, visualize detalhes imediatos (nome e tamanho), remova ou troque o arquivo e dispare a ação de extração de dados.
+O **FinTrack** une a administração financeira operacional ao poder da IA generativa. Além de permitir a extração e estruturação automática de dados de faturas/notas fiscais a partir de arquivos PDF, o sistema oferece um painel administrativo completo para controle de fornecedores, clientes, faturados, categorias orçamentárias e lançamentos parcelados.
 
 ---
 
-## 📁 Estrutura do Projeto e Resumo dos Códigos
+## 👥 Criadores e Autores
 
-O projeto foi construído utilizando tecnologias web fundamentais (HTML, CSS e JavaScript Vanilla), prezando pela simplicidade, clareza e facilidade de manutenção:
-
-### 1. `index.html`
-- **Função**: Define a estrutura semântica e acessível da interface.
-- **Destaques**:
-  - Cabeçalho com título e descrição do propósito do sistema.
-  - Card centralizado com ícones SVG modernos para upload.
-  - Input de arquivo customizado com texto de feedback de seleção.
-  - Card dinâmico para exibição de metadados do PDF selecionado (nome, tamanho e botão de remoção rápida).
-  - Botão de ação *"EXTRAIR DADOS"*, inicialmente desabilitado até a escolha de um arquivo válido.
-  - Legenda e atribuição de figura acadêmica (*"Fonte: Autor (2025)"*).
-
-### 2. `style.css`
-- **Função**: Responsável por toda a identidade visual, layout e responsividade.
-- **Destaques**:
-  - Estilização limpa, sem dependências externas pesadas (apenas importação da fonte *Inter*).
-  - Paleta de cores neutras e corporativas (tons de cinza, ardósia e azul de destaque).
-  - Feedback visual claro para os estados dos botões (hover, clique e desabilitado).
-  - Layout flexível e responsivo, adaptável tanto a desktops quanto a dispositivos móveis.
-
-### 3. `app.js`
-- **Função**: Controla a lógica e a interatividade da aplicação no navegador.
-- **Destaques**:
-  - **Validação de formato**: Garante que apenas arquivos `.pdf` válidos sejam aceitos, alertando o usuário caso contrário.
-  - **Cálculo de tamanho**: Converte e formata dinamicamente o peso do arquivo em bytes para uma visualização amigável (`KB` ou `MB`).
-  - **Gerenciamento de estado**: Controla a visibilidade dos metadados do arquivo e o desbloqueio do botão de extração.
-  - **Limpeza e reset**: Permite remover o arquivo atual e restaurar a interface ao estado inicial.
-  - **Ponto de integração**: Prepara o arquivo selecionado no evento de clique para envio ao futuro Agente/API de IA.
+- **Júlia Favieira** ([@Jubsvf](https://github.com/Jubsvf))
+- **Felipe Martins** ([@felipemartinsgithub](https://github.com/felipemartinsgithub))
 
 ---
 
-## 🚀 Como Executar
+## 🚀 Principais Módulos e Funcionalidades
 
-Por utilizar tecnologias nativas, a aplicação não requer instalação de dependências ou servidores complexos:
+### 1. 🤖 Leitor de Nota Fiscal & Extração com IA
+- Upload intuitivo com visualização de metadados do PDF (tamanho, formato e validações).
+- Integração com **Google Gemini API** (`google-genai`) para reconhecimento de campos cruciais (Número da NF, CNPJ do Fornecedor, Data de Emissão, Valor Total, Itens/Produtos e Vencimentos).
+- **Mecanismo de Fallback**: Parsing local estruturado com `pypdf` para contingência.
+- **Classificação Automática de Despesas**: A IA deduz inteligentemente o centro/tipo de despesa de acordo com a descrição dos itens faturados.
+- Integração em um clique para persistir diretamente em **Contas a Pagar**.
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/Jubsvf/Leitor-de-PDF.git
-   ```
-2. Abra a pasta do projeto e dê dois cliques no arquivo `index.html` (ou abra-o diretamente no navegador de sua preferência).
+### 2. 👥 Cadastros Gerais (CRUDs Administrativos)
+- **Manter Fornecedor**: Cadastro com Razão Social, Nome Fantasia, CNPJ e controle de status (Ativo/Inativo com exclusão lógica).
+- **Manter Cliente**: Cadastro corporativo ou pessoa física com CPF/CNPJ e gerenciamento de status.
+- **Manter Faturado**: Cadastro de Pessoa Física / Destinatário final com CPF e controle de atividade.
+- **Classificação Orçamentária**:
+  - **Tipos de Despesa**: Categorias macro (Insumos Agrícolas, Manutenção e Operação, Recursos Humanos, Serviços Operacionais, Infraestrutura, Administrativas, etc.) e subcategorias.
+  - **Tipos de Receita**: Categorias de receitas operacionais e agrícolas com vinculação direta.
 
----
+### 3. 💳 Gestão Financeira
+- **Contas a Pagar**:
+  - Vínculo com Fornecedor, Faturado, Documento/NF, Data de Emissão, Valor Total e Detalhamento de Itens.
+  - Rateio e classificação de despesas por percentual/valor.
+  - Parcelamento com identificador único de parcela, datas de vencimento customizadas e status (Pendente/Pago/Cancelado).
+  - Validação estrita da integridade financeira (soma das parcelas vs valor total).
+- **Contas a Receber**:
+  - Vínculo com Cliente, Faturado, Documento, Emissão e Valor Total.
+  - Rateio de receitas operacionais.
+  - Gestão de parcelas a receber com vencimentos e status.
 
-## 🚀 Backend e Tecnologias Integradas
-
-O backend foi desenvolvido em conformidade com os requisitos da atividade acadêmica:
-- **Linguagem**: Python 3
-- **Framework Web**: Flask com CORS e Flasgger (Documentação Swagger UI)
-- **SGBD**: PostgreSQL (banco `fintrack_db`, porta 5433 / configurável via `.env`)
-- **ORM**: SQLAlchemy com driver moderno `psycopg` (v3)
-- **Inteligência Artificial**: Agente com Google Gemini API (`google-genai`) e fallback inteligente com parsing via `pypdf`.
-
----
-
-## 📋 Funcionalidades Implementadas
-
-1. **MANTER FORNECEDOR** (`/fornecedores` e `/api/fornecedores`):
-   - Cadastro com Razão Social, Nome Fantasia e CNPJ.
-   - Listagem com filtro por status.
-   - **Regra de negócio**: Registros não são excluídos fisicamente; são inativados e podem ser reativados.
-
-2. **MANTER CLIENTE** (`/clientes` e `/api/clientes`):
-   - Cadastro com Nome/Razão Social, Nome Fantasia e CPF/CNPJ.
-   - Inativação e reativação.
-
-3. **MANTER FATURADO** (`/faturados` e `/api/faturados`):
-   - Cadastro de Pessoa Física / Destinatário com Nome Completo e CPF.
-   - Inativação e reativação.
-
-4. **MANTER TIPO DE RECEITA** (`/tipos-receita` e `/api/tipos-receita`):
-   - Cadastro e categorização de receitas operacionais e agrícolas.
-   - Inativação e reativação.
-
-5. **MANTER TIPO DE DESPESA** (`/tipos-despesa` e `/api/tipos-despesa`):
-   - Classificação com as categorias macro oficiais (Insumos Agrícolas, Manutenção e Operação, Recursos Humanos, Serviços Operacionais, Infraestrutura e Utilidades, Administrativas, Seguros e Proteção, Impostos e Taxas, Investimentos) e suas subcategorias.
-   - Inativação e reativação.
-
-6. **REGISTRAR CONTAS A PAGAR** (`/contas-pagar` e `/api/contas-pagar`):
-   - Vínculo com Fornecedor, Faturado, NF, Emissão, Valor e Itens.
-   - Suporte a múltiplas parcelas com datas de vencimento distintas e múltiplas classificações de despesa.
-
-7. **REGISTRAR CONTAS A RECEBER** (`/contas-receber` e `/api/contas-receber`):
-   - Vínculo com Cliente, Faturado, Documento, Emissão, Valor e Itens.
-   - Suporte a múltiplas parcelas com datas de vencimento distintas e múltiplas classificações de receita.
-
-8. **PROCESSADOR DE PDF & AGENTE DE IA** (`/` e `/api/extrair-pdf`):
-   - Classe `Agente` com método `extrair_dados(pdf_file, prompt)`.
-   - Extrai os campos obrigatórios e infere a **classificação da despesa** baseada nos produtos, retornando estritamente o formato JSON solicitado.
-   - Integração com o botão *"EXTRAIR DADOS"* do frontend original e opção de persistência direta em Contas a Pagar (`/api/salvar-conta-pagar-pdf`).
+### 4. 📖 Documentação da API
+- Documentação interativa **Swagger / OpenAPI** disponível via **Flasgger** na rota `/apidocs`.
 
 ---
 
-## 🛠️ Como Executar o Sistema
+## 🛠️ Tecnologias Utilizadas
 
-1. **Configurar variáveis de ambiente**:
-   Edite o arquivo `.env` na pasta do projeto e adicione sua chave da API do Gemini:
-   ```env
-   GEMINI_API_KEY=sua_chave_aqui
-   DATABASE_URL=postgresql+psycopg://postgres:admin@127.0.0.1:5433/fintrack_db
-   ```
+- **Backend**: Python 3.10+, Flask, Flask-CORS, Flasgger
+- **Banco de Dados**: SQLAlchemy ORM (compatível com PostgreSQL em produção e SQLite em desenvolvimento)
+- **Driver de Conexão**: `psycopg` (v3) e `psycopg2-binary`
+- **Inteligência Artificial**: Google Gemini API (`google-genai`) & `pypdf`
+- **Frontend**: HTML5 Semântico, CSS3 Moderno (Glassmorphism, responsividade), JavaScript Vanilla
+- **Deploy**: Preparado para Render / WSGI (Gunicorn)
 
-2. **Iniciar o Servidor Flask**:
-   ```bash
-   python server.py
-   ```
+---
 
-3. **Acessar as Interfaces**:
-   - **Upload & Extração de PDF**: [http://127.0.0.1:5000/](http://127.0.0.1:5000/)
-   - **Manter Fornecedores**: [http://127.0.0.1:5000/fornecedores](http://127.0.0.1:5000/fornecedores)
-   - **Manter Clientes**: [http://127.0.0.1:5000/clientes](http://127.0.0.1:5000/clientes)
-   - **Manter Faturados**: [http://127.0.0.1:5000/faturados](http://127.0.0.1:5000/faturados)
-   - **Manter Tipos de Despesa**: [http://127.0.0.1:5000/tipos-despesa](http://127.0.0.1:5000/tipos-despesa)
-   - **Manter Tipos de Receita**: [http://127.0.0.1:5000/tipos-receita](http://127.0.0.1:5000/tipos-receita)
-   - **Registrar Contas a Pagar**: [http://127.0.0.1:5000/contas-pagar](http://127.0.0.1:5000/contas-pagar)
-   - **Registrar Contas a Receber**: [http://127.0.0.1:5000/contas-receber](http://127.0.0.1:5000/contas-receber)
-   - **Documentação Swagger/OpenAPI**: [http://127.0.0.1:5000/apidocs](http://127.0.0.1:5000/apidocs)
+## ⚙️ Como Executar Localmente
+
+### 1. Clonar o repositório
+```bash
+git clone https://github.com/Jubsvf/Pagina-ADM---Financeiro.git
+cd Pagina-ADM---Financeiro
+```
+
+### 2. Criar e ativar o ambiente virtual (opcional, recomendado)
+```bash
+# Windows
+python -m venv venv
+.\venv\Scripts\activate
+
+# Linux/Mac
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Instalar dependências
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configurar variáveis de ambiente
+Crie um arquivo `.env` na raiz do projeto (baseando-se no `.env.example`):
+```env
+GEMINI_API_KEY=sua_chave_do_google_gemini_aqui
+DATABASE_URL=sqlite:///fintrack.db
+SECRET_KEY=sua_chave_secreta
+```
+
+### 5. Iniciar o servidor
+```bash
+python app.py
+```
+*(ou `python server.py`)*
+
+O sistema inicializará as tabelas e o seed padrão automaticamente, ficando disponível em:
+👉 **http://127.0.0.1:5000**
+
+---
+
+## 🔑 Credenciais Padrão de Acesso
+
+- **URL de Login**: [http://127.0.0.1:5000/login](http://127.0.0.1:5000/login)
+- **Usuário**: `admin`
+- **Senha**: `fintrack2025`
+
+---
+
+## 📁 Rotas Principais
+
+| Rota | Descrição |
+| :--- | :--- |
+| `/login` | Tela de autenticação |
+| `/` ou `/dashboard` | Painel inicial e métricas |
+| `/extracao` | Leitor de Nota Fiscal com IA |
+| `/fornecedores` | Cadastro e gestão de Fornecedores |
+| `/clientes` | Cadastro e gestão de Clientes |
+| `/faturados` | Cadastro e gestão de Faturados |
+| `/tipos-despesa` | Categorias e subcategorias de despesa |
+| `/tipos-receita` | Categorias de receitas |
+| `/contas-pagar` | Movimentação e parcelamento de Contas a Pagar |
+| `/contas-receber` | Movimentação e parcelamento de Contas a Receber |
+| `/apidocs` | Documentação interativa Swagger/OpenAPI |
