@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Extração de Nota Fiscal — AgroFinanceiro N2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar Lateral Esquerda -->
+    <aside class="app-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-header">
+          <div class="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <div class="brand-title">
+              <span>AgroFinanceiro</span>
+              <span class="brand-badge">N2</span>
+            </div>
+            <span class="brand-subtitle">UniRV &bull; 2ª Etapa Avaliativa</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-user">
+        <div class="user-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="user-info">
+          <span class="user-name">Financeiro</span>
+          <span class="user-role">Administrador</span>
+        </div>
+        <button type="button" class="btn-logout-sidebar" id="btnLogoutSidebar" title="Encerrar Sessão">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">MÓDULOS</div>
+        <a href="/" class="sidebar-link">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+          </svg>
+          <span>Lançamentos Financeiros</span>
+          <span class="sidebar-arrow">&rsaquo;</span>
+        </a>
+        <a href="/extracao" class="sidebar-link active">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>Extrair Nota Fiscal</span>
+          <span class="sidebar-arrow">&rsaquo;</span>
+        </a>
+
+        <div class="nav-group-title">CADASTROS</div>
+        <a href="/fornecedores" class="sidebar-link">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="3" width="15" height="13"></rect>
+            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+            <circle cx="5.5" cy="18.5" r="2.5"></circle>
+            <circle cx="18.5" cy="18.5" r="2.5"></circle>
+          </svg>
+          <span>Fornecedores</span>
+        </a>
+        <a href="/clientes" class="sidebar-link">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Clientes</span>
+        </a>
+        <a href="/faturados" class="sidebar-link">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <polyline points="16 11 18 13 22 9"></polyline>
+          </svg>
+          <span>Faturados</span>
+        </a>
+        <a href="/tipos-despesa" class="sidebar-link">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+          </svg>
+          <span>Tipos de Despesa</span>
+        </a>
+        <a href="/tipos-receita" class="sidebar-link">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+          </svg>
+          <span>Tipos de Receita</span>
+        </a>
+
+        <div class="nav-group-title">RELATÓRIOS</div>
+        <a href="/contas-pagar" class="sidebar-link">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+          <span>Contas a Pagar</span>
+        </a>
+        <a href="/contas-receber" class="sidebar-link">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+          <span>Contas a Receber</span>
+        </a>
+        <a href="/apidocs" target="_blank" class="sidebar-link">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span>Swagger API</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="footer-meta-item">
+          <span>Versão Git:</span>
+          <span class="git-badge" id="sidebarGitHash">12c68a</span>
+        </div>
+        <div class="footer-meta-item">
+          <span>Ambiente:</span>
+          <span class="env-text">Produção (Nuvem)</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="app-main-content">
+      <div class="app-container">
+        <!-- Cabeçalho Principal -->
+        <header class="header-section" style="text-align: left;">
+          <h1 class="main-title">Extração de Dados de Nota Fiscal</h1>
+          <p class="subtitle">Carregue um PDF de nota fiscal e extraia os dados automaticamente usando Inteligência Artificial</p>
+        </header>
+
+        <!-- Card de Configuração da Chave API -->
+        <section class="card" id="apiKeyCard" style="margin-bottom: 4px;">
+          <div class="card-header">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+            </svg>
+            <span class="card-title">Chave da API Gemini</span>
+            <span id="keyStatusBadge" style="margin-left: auto; font-size: 11px; padding: 3px 12px; border-radius: 99px; background: #fef9c3; color: #854d0e; font-weight: 600;">Verificando...</span>
+          </div>
+          <div style="padding: 12px 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <input
+              type="password"
+              id="apiKeyInput"
+              placeholder="Cole sua chave Gemini aqui (opcional se já configurada no servidor)"
+              style="flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none;"
+            >
+            <button type="button" id="btnAplicarChave" style="padding: 8px 16px; background: #0f172a; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-family: inherit; cursor: pointer; white-space: nowrap;">
+              Aplicar Chave
+            </button>
+            <button type="button" id="btnToggleKey" title="Mostrar/esconder chave" style="padding: 8px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 13px;">
+              👁
+            </button>
+          </div>
+          <p style="padding: 0 16px 12px; font-size: 11px; color: #64748b; margin: 0;">
+            A chave fica ativa enquanto a aplicação estiver aberta. Obtenha sua chave no
+            <a href="https://aistudio.google.com/" target="_blank" style="color: #2563eb;">Google AI Studio</a>.
+          </p>
+        </section>
+
+        <!-- Card de Upload -->
+        <section class="card upload-card" id="uploadCard">
+          <div class="card-header">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span class="card-title">Upload do PDF</span>
+          </div>
+
+          <div class="upload-content">
+            <label for="pdfInput" class="upload-label">Selecione o arquivo PDF da nota fiscal</label>
+            
+            <div class="file-input-wrapper">
+              <input type="file" id="pdfInput" accept="application/pdf" class="real-file-input">
+              <label for="pdfInput" class="custom-file-btn" id="filePickerBtn">Escolher arquivo</label>
+              <span class="file-status-text" id="fileStatusText">Nenhum arquivo escolhido</span>
+            </div>
+
+            <!-- Informações do Arquivo Selecionado -->
+            <div class="file-info-box hidden" id="fileInfoBox">
+              <div class="file-info-main">
+                <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                <span class="file-name" id="fileName">arquivo.pdf</span>
+              </div>
+              <div class="file-meta">
+                <span class="file-size" id="fileSize">0.00 MB</span>
+                <button type="button" class="btn-remove-file" id="btnRemoveFile" title="Remover arquivo" aria-label="Remover arquivo">&times;</button>
+              </div>
+            </div>
+
+            <!-- Botão de Ação -->
+            <button type="button" class="btn-action" id="btnExtract" disabled>
+              <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+              </svg>
+              <span id="btnText">Extrair Dados</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Card de Análise Prévia -->
+        <section class="card hidden" id="analysisCard">
+          <div class="card-header" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span class="card-title">Análise de Entidades e Relacionamento</span>
+            </div>
+            <span id="analysisBadge" class="badge badge-active" style="display: none;">Pronto para Lançamento</span>
+          </div>
+          <div style="padding: 16px; display: flex; flex-direction: column; gap: 14px;">
+            <div class="analysis-grid">
+              <div class="analysis-box">
+                <div class="analysis-box-title">Fornecedor (Emitente)</div>
+                <div id="statusFornecedor" class="entity-status-badge entity-status-new">Analisando...</div>
+                <div id="detalhesFornecedor" style="margin-top: 6px; font-size: 12px; color: #475569;"></div>
+              </div>
+              <div class="analysis-box">
+                <div class="analysis-box-title">Faturado (Destinatário)</div>
+                <div id="statusFaturado" class="entity-status-badge entity-status-new">Analisando...</div>
+                <div id="detalhesFaturado" style="margin-top: 6px; font-size: 12px; color: #475569;"></div>
+              </div>
+              <div class="analysis-box" style="grid-column: 1 / -1;">
+                <div class="analysis-box-title">Classificação da Despesa (Agrícola)</div>
+                <div id="statusClassificacao" class="entity-status-badge entity-status-new">Analisando...</div>
+                <div id="detalhesClassificacao" style="margin-top: 6px; font-size: 12px; color: #475569;"></div>
+              </div>
+            </div>
+
+            <div class="meta-summary">
+              <div class="meta-summary-item">
+                <span class="meta-summary-label">Nº Nota Fiscal:</span>
+                <span class="meta-summary-val" id="metaNumeroNf">-</span>
+              </div>
+              <div class="meta-summary-item">
+                <span class="meta-summary-label">Data de Emissão:</span>
+                <span class="meta-summary-val" id="metaDataEmissao">-</span>
+              </div>
+              <div class="meta-summary-item">
+                <span class="meta-summary-label">Valor Total:</span>
+                <span class="meta-summary-val" id="metaValorTotal" style="color: #166534;">-</span>
+              </div>
+              <div class="meta-summary-item">
+                <span class="meta-summary-label">Parcelas:</span>
+                <span class="meta-summary-val" id="metaParcelas">-</span>
+              </div>
+            </div>
+
+            <button type="button" class="btn-action" id="btnProcessarLancamento" style="background-color: #166534;">
+              <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span id="btnProcessarText">Confirmar e Processar Lançamento</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Card de Confirmação Final pós-gravação -->
+        <section class="confirmation-card hidden" id="confirmationCard">
+          <div class="confirmation-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 22px; height: 22px;">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span>Lançamento registrado com sucesso!</span>
+          </div>
+          <ul class="confirmation-list" id="confirmationList"></ul>
+          <div style="display: flex; gap: 8px; margin-top: 6px;">
+            <a href="/contas-pagar" class="custom-file-btn" style="background: #166534; color: #fff; text-decoration: none; font-size: 13px;">
+              Ver em Contas a Pagar
+            </a>
+            <a href="/" class="custom-file-btn" style="background: #0f172a; color: #fff; text-decoration: none; font-size: 13px;">
+              Ir para Lançamentos
+            </a>
+          </div>
+        </section>
+
+        <!-- Card de Resultado da Extração (JSON) -->
+        <section class="card hidden" id="resultCard">
+          <div class="card-header" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+              <span class="card-title">Resultado da Extração (JSON)</span>
+            </div>
+          </div>
+          <div style="padding: 16px;">
+            <pre id="jsonResult" style="background: #0f172a; color: #f8fafc; padding: 14px; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; line-height: 1.5;"></pre>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="toast.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

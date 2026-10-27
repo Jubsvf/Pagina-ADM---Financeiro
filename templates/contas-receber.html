@@ -3,59 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registrar Contas a Pagar - Gestão Financeira</title>
+  <title>Registrar Contas a Receber - Gestão Financeira</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-container-wide">
-    <header class="header-section">
-      <h1 class="main-title">Sistema de Gestão Financeira</h1>
-      <p class="subtitle">Registrar e Acompanhar Contas a Pagar</p>
-    </header>
+  <div class="app-layout">
+    {% include 'sidebar.html' %}
+    <main class="app-main-content">
+      <div class="app-container-wide">
+        <header class="header-section" style="text-align: left; margin-bottom: 8px;">
+          <h1 class="main-title">Contas a Receber</h1>
+          <p class="subtitle">Registrar e acompanhar contas a receber e parcelas</p>
+        </header>
 
-    <nav class="top-nav">
-      <a href="index.html" class="nav-link">Extração PDF</a>
-      <a href="fornecedores.html" class="nav-link">Fornecedores</a>
-      <a href="clientes.html" class="nav-link">Clientes</a>
-      <a href="faturados.html" class="nav-link">Faturados</a>
-      <a href="tipos-despesa.html" class="nav-link">Tipos Despesa</a>
-      <a href="tipos-receita.html" class="nav-link">Tipos Receita</a>
-      <a href="contas-pagar.html" class="nav-link active">Contas Pagar</a>
-      <a href="contas-receber.html" class="nav-link">Contas Receber</a>
-      <a href="/apidocs" target="_blank" class="nav-link" style="color: #2563eb;">Swagger API</a>
-    </nav>
-
-    <div id="alertBanner" class="alert-banner"></div>
+        <div id="alertBanner" class="alert-banner"></div>
 
     <section class="card">
       <div class="card-header">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-          <line x1="1" y1="10" x2="23" y2="10"></line>
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+          <polyline points="17 6 23 6 23 12"></polyline>
         </svg>
-        <span class="card-title">Registrar Nova Conta a Pagar</span>
+        <span class="card-title">Registrar Nova Conta a Receber</span>
       </div>
       <div style="padding: 20px;">
-        <form id="formContaPagar">
+        <form id="formContaReceber">
           <div class="form-grid">
             <div class="form-group">
-              <label for="fornecedorId">Fornecedor (Emitente) *</label>
-              <select id="fornecedorId" class="form-control" required>
-                <option value="">Carregando fornecedores...</option>
+              <label for="clienteId">Cliente *</label>
+              <select id="clienteId" class="form-control" required>
+                <option value="">Carregando clientes...</option>
               </select>
             </div>
             <div class="form-group">
-              <label for="faturadoId">Faturado (Destinatário) *</label>
+              <label for="faturadoId">Faturado (Pessoa/Titular) *</label>
               <select id="faturadoId" class="form-control" required>
                 <option value="">Carregando faturados...</option>
               </select>
             </div>
             <div class="form-group">
-              <label for="numeroNf">Número da Nota Fiscal *</label>
-              <input type="text" id="numeroNf" class="form-control" placeholder="000.084.682" required>
+              <label for="numeroDocumento">Número do Documento / Contrato *</label>
+              <input type="text" id="numeroDocumento" class="form-control" placeholder="DOC-2025/001" required>
             </div>
             <div class="form-group">
               <label for="dataEmissao">Data de Emissão *</label>
@@ -70,18 +61,18 @@
               <input type="number" step="0.01" id="valorTotal" class="form-control" placeholder="0.00" required>
             </div>
             <div class="form-group" style="grid-column: 1 / -1;">
-              <label for="tipoDespesaId">Classificação da Despesa *</label>
-              <select id="tipoDespesaId" class="form-control" required>
-                <option value="">Carregando tipos de despesa...</option>
+              <label for="tipoReceitaId">Classificação da Receita *</label>
+              <select id="tipoReceitaId" class="form-control" required>
+                <option value="">Carregando tipos de receita...</option>
               </select>
             </div>
             <div class="form-group" style="grid-column: 1 / -1;">
-              <label for="descricaoProdutos">Descrição dos Produtos / Serviços</label>
-              <textarea id="descricaoProdutos" class="form-control" rows="2" placeholder="Detalhes dos itens adquiridos (ex: Peças agrícolas, graxa, combustível)"></textarea>
+              <label for="descricao">Descrição dos Serviços / Produtos Faturados</label>
+              <textarea id="descricao" class="form-control" rows="2" placeholder="Ex: Fornecimento de grãos de soja safra 2024/2025"></textarea>
             </div>
           </div>
-          <button type="submit" class="btn-action" style="max-width: 240px;">
-            Registrar Conta a Pagar
+          <button type="submit" class="btn-action" style="max-width: 250px;">
+            Registrar Conta a Receber
           </button>
           <div class="rule-note">Estrutura relacional no PostgreSQL suporta múltiplas parcelas com datas distintas e múltiplas classificações.</div>
         </form>
@@ -96,7 +87,7 @@
             <line x1="3" y1="9" x2="21" y2="9"></line>
             <line x1="9" y1="21" x2="9" y2="9"></line>
           </svg>
-          <span class="card-title">Contas a Pagar Registradas</span>
+          <span class="card-title">Contas a Receber Registradas</span>
         </div>
         <div>
           <select id="filtroAtivo" class="form-control" style="padding: 4px 8px; font-size: 12px;">
@@ -110,8 +101,8 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>NF</th>
-              <th>Fornecedor</th>
+              <th>Documento</th>
+              <th>Cliente</th>
               <th>Faturado</th>
               <th>Emissão</th>
               <th>Vencimento</th>
@@ -121,8 +112,8 @@
               <th style="text-align: right;">Ações</th>
             </tr>
           </thead>
-          <tbody id="tabelaContasPagar">
-            <tr><td colspan="9" style="text-align: center; color: #64748b;">Carregando contas a pagar...</td></tr>
+          <tbody id="tabelaContasReceber">
+            <tr><td colspan="9" style="text-align: center; color: #64748b;">Carregando contas a receber...</td></tr>
           </tbody>
         </table>
       </div>
@@ -148,6 +139,10 @@
     }
 
     function showAlert(msg, isError = false) {
+      if (typeof window.mostrarNotificacao === 'function') {
+        window.mostrarNotificacao(msg, isError ? 'erro' : 'sucesso');
+        return;
+      }
       const el = document.getElementById('alertBanner');
       if (!el) return;
       el.textContent = msg;
@@ -158,51 +153,51 @@
 
     async function carregarCombos() {
       try {
-        const [rForn, rFat, rDesp] = await Promise.all([
-          fetch(`${API_BASE}/api/fornecedores?ativo=true`),
+        const [rCli, rFat, rRec] = await Promise.all([
+          fetch(`${API_BASE}/api/clientes?ativo=true`),
           fetch(`${API_BASE}/api/faturados?ativo=true`),
-          fetch(`${API_BASE}/api/tipos-despesa?ativo=true`)
+          fetch(`${API_BASE}/api/tipos-receita?ativo=true`)
         ]);
-        const forns = await rForn.json();
+        const clis = await rCli.json();
         const fats = await rFat.json();
-        const desps = await rDesp.json();
+        const recs = await rRec.json();
 
-        const selForn = document.getElementById('fornecedorId');
-        selForn.innerHTML = '<option value="">Selecione o Fornecedor...</option>' + 
-          forns.map(f => `<option value="${f.id}">${f.razao_social} (${f.cnpj})</option>`).join('');
+        const selCli = document.getElementById('clienteId');
+        selCli.innerHTML = '<option value="">Selecione o Cliente...</option>' + 
+          clis.map(c => `<option value="${c.id}">${c.razao_social} (${c.cpf_cnpj})</option>`).join('');
 
         const selFat = document.getElementById('faturadoId');
         selFat.innerHTML = '<option value="">Selecione o Faturado...</option>' + 
           fats.map(f => `<option value="${f.id}">${f.nome_completo} (${f.cpf})</option>`).join('');
 
-        const selDesp = document.getElementById('tipoDespesaId');
-        selDesp.innerHTML = '<option value="">Selecione o Tipo de Despesa...</option>' + 
-          desps.map(d => `<option value="${d.id}">[${d.categoria}] ${d.descricao}</option>`).join('');
+        const selRec = document.getElementById('tipoReceitaId');
+        selRec.innerHTML = '<option value="">Selecione o Tipo de Receita...</option>' + 
+          recs.map(r => `<option value="${r.id}">${r.descricao}</option>`).join('');
       } catch (e) {
         console.error('Erro ao carregar selects', e);
       }
     }
 
-    async function carregarContasPagar() {
+    async function carregarContasReceber() {
       const filtro = document.getElementById('filtroAtivo').value;
       try {
-        const res = await fetch(`${API_BASE}/api/contas-pagar?ativo=${filtro}`);
+        const res = await fetch(`${API_BASE}/api/contas-receber?ativo=${filtro}`);
         const dados = await res.json();
-        const tbody = document.getElementById('tabelaContasPagar');
+        const tbody = document.getElementById('tabelaContasReceber');
         if (!dados || dados.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #64748b;">Nenhuma conta a pagar encontrada.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #64748b;">Nenhuma conta a receber encontrada.</td></tr>';
           return;
         }
         tbody.innerHTML = dados.map(c => {
           const primParcela = (c.parcelas && c.parcelas[0]) ? c.parcelas[0].data_vencimento : '-';
-          const classifTexto = (c.classificacoes && c.classificacoes[0] && c.classificacoes[0].tipo_despesa) 
-            ? c.classificacoes[0].tipo_despesa.categoria 
+          const classifTexto = (c.classificacoes && c.classificacoes[0] && c.classificacoes[0].tipo_receita) 
+            ? c.classificacoes[0].tipo_receita.descricao 
             : '-';
 
           return `
             <tr>
-              <td><strong>${c.numero_nf}</strong></td>
-              <td>${c.fornecedor ? c.fornecedor.razao_social : '-'}</td>
+              <td><strong>${c.numero_documento}</strong></td>
+              <td>${c.cliente ? c.cliente.razao_social : '-'}</td>
               <td>${c.faturado ? c.faturado.nome_completo : '-'}</td>
               <td>${formatDate(c.data_emissao)}</td>
               <td>${formatDate(primParcela)}</td>
@@ -224,18 +219,18 @@
           `;
         }).join('');
       } catch (e) {
-        showAlert('Erro ao carregar contas a pagar do PostgreSQL', true);
+        showAlert('Erro ao carregar contas a receber do PostgreSQL', true);
       }
     }
 
     async function inativar(id) {
-      if (!confirm('Deseja realmente inativar este registro de conta a pagar?')) return;
+      if (!confirm('Deseja realmente inativar este registro de conta a receber?')) return;
       try {
-        const res = await fetch(`${API_BASE}/api/contas-pagar/${id}/inativar`, { method: 'POST' });
+        const res = await fetch(`${API_BASE}/api/contas-receber/${id}/inativar`, { method: 'POST' });
         const data = await res.json();
         if (res.ok) {
-          showAlert(data.mensagem || 'Conta a pagar inativada com sucesso.');
-          carregarContasPagar();
+          showAlert(data.mensagem || 'Conta a receber inativada com sucesso.');
+          carregarContasReceber();
         } else {
           showAlert(data.erro || 'Erro ao inativar', true);
         }
@@ -246,11 +241,11 @@
 
     async function reativar(id) {
       try {
-        const res = await fetch(`${API_BASE}/api/contas-pagar/${id}/reativar`, { method: 'POST' });
+        const res = await fetch(`${API_BASE}/api/contas-receber/${id}/reativar`, { method: 'POST' });
         const data = await res.json();
         if (res.ok) {
-          showAlert(data.mensagem || 'Conta a pagar reativada com sucesso.');
-          carregarContasPagar();
+          showAlert(data.mensagem || 'Conta a receber reativada com sucesso.');
+          carregarContasReceber();
         } else {
           showAlert(data.erro || 'Erro ao reativar', true);
         }
@@ -259,38 +254,38 @@
       }
     }
 
-    document.getElementById('formContaPagar').addEventListener('submit', async (e) => {
+    document.getElementById('formContaReceber').addEventListener('submit', async (e) => {
       e.preventDefault();
       const valor = parseFloat(document.getElementById('valorTotal').value);
       const dataVenc = document.getElementById('dataVencimento').value;
-      const tipoDespId = parseInt(document.getElementById('tipoDespesaId').value);
+      const tipoRecId = parseInt(document.getElementById('tipoReceitaId').value);
 
       const payload = {
-        fornecedor_id: parseInt(document.getElementById('fornecedorId').value),
+        cliente_id: parseInt(document.getElementById('clienteId').value),
         faturado_id: parseInt(document.getElementById('faturadoId').value),
-        numero_nf: document.getElementById('numeroNf').value,
+        numero_documento: document.getElementById('numeroDocumento').value,
         data_emissao: document.getElementById('dataEmissao').value,
         valor_total: valor,
-        descricao_produtos: document.getElementById('descricaoProdutos').value,
+        descricao: document.getElementById('descricao').value,
         parcelas: [
           { numero_parcela: 1, data_vencimento: dataVenc, valor: valor, status: 'PENDENTE' }
         ],
         classificacoes: [
-          { tipo_despesa_id: tipoDespId, percentual: 100.0, valor: valor }
+          { tipo_receita_id: tipoRecId, percentual: 100.0, valor: valor }
         ]
       };
 
       try {
-        const res = await fetch(`${API_BASE}/api/contas-pagar`, {
+        const res = await fetch(`${API_BASE}/api/contas-receber`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (res.ok) {
-          showAlert('Conta a pagar registrada com sucesso no PostgreSQL!');
+          showAlert('Conta a receber registrada com sucesso no PostgreSQL!');
           e.target.reset();
-          carregarContasPagar();
+          carregarContasReceber();
         } else {
           showAlert(data.erro || 'Erro ao registrar', true);
         }
@@ -299,9 +294,13 @@
       }
     });
 
-    document.getElementById('filtroAtivo').addEventListener('change', carregarContasPagar);
+    document.getElementById('filtroAtivo').addEventListener('change', carregarContasReceber);
     carregarCombos();
-    carregarContasPagar();
+    carregarContasReceber();
   </script>
+      </div>
+    </main>
+  </div>
+  <script src="toast.js"></script>
 </body>
 </html>

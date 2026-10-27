@@ -1,5 +1,6 @@
 from database import engine, Base, SessionLocal
 from models import TipoDespesa, TipoReceita, Fornecedor, Faturado, Cliente
+from migrations import run_migrations
 
 CATEGORIAS_DESPESA = [
     {
@@ -91,9 +92,10 @@ TIPOS_RECEITA = [
 
 
 def init_database():
-    print("Criando tabelas no PostgreSQL...")
+    print("Criando tabelas no PostgreSQL/SQLite...")
     Base.metadata.create_all(bind=engine)
-    print("Tabelas criadas com sucesso.")
+    run_migrations()
+    print("Tabelas e migrações aplicadas com sucesso.")
 
     db = SessionLocal()
     try:

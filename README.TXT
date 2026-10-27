@@ -1,40 +1,52 @@
 =============================================================
  LEITOR DE NOTA FISCAL - SISTEMA DE EXTRACAO COM IA
- Atividade Pratica Academica
+ Atividade Pratica Academica - Gestao Financeira & IA
 =============================================================
 
-REPOSITORIO GITHUB
-------------------
-URL: https://github.com/Jubsvf/Leitor-de-PDF
-Codigo de Versionamento (commit atual): 5e08c2fda1e60038dd3a5c3a148ae654f7b0a5fe
-Commit curto: 5e08c2f
-Link do commit: https://github.com/Jubsvf/Leitor-de-PDF/commit/5e08c2fda1e60038dd3a5c3a148ae654f7b0a5fe
+REPOSITORIOS GITHUB
+-------------------
+URL Principal: https://github.com/Jubsvf/Pagina-ADM---Financeiro
+URL Original:  https://github.com/Jubsvf/Leitor-de-PDF
 
-HISTORICO DE VERSOES (commits)
+AUTORES / DESENVOLVEDORES
+-------------------------
+- Julia Favieira (GitHub: @Jubsvf)
+- Felipe Martins (GitHub: @felipemartinsgithub)
+
+CODIGO DE VERSIONAMENTO (COMMIT ATUAL)
+---------------------------------------
+Commit Hash: fa2fbae3a66092ad7e79d83b7f4d98f351692dd7
+Commit Curto: fa2fbae
+Data/Hora: Mon Oct 26 23:34:12 2026 -0300
+Link Direto: https://github.com/Jubsvf/Pagina-ADM---Financeiro/commit/fa2fbae3a66092ad7e79d83b7f4d98f351692dd7
+
+HISTORICO DE VERSOES (COMMITS)
 -------------------------------
-A aplicacao demonstra o versionamento diretamente na interface,
-no rodape da pagina principal (http://127.0.0.1:5000/).
-O hash do commit e exibido em tempo real via rota /api/version.
+7859711 - Mon Oct 26 23:32:54 2026 - fix: configurar deploy para Vercel e remover arquivos do Render
+a384c88 - Mon Oct 26 23:26:39 2026 - docs: atualizar README com detalhes do projeto e criadores
+4408dde - Mon Sep 28 21:45:47 2026 - fix: correcao na extracao dos dados das notas fiscais em PDF
+e2193af - Sun Sep 27 17:33:57 2026 - docs: atualizar hash de versionamento no README.TXT
+5e08c2f - Sun Sep 27 17:32:56 2026 - fix: ajustar chamadas de API relativas para producao
 
 DADOS DE LOGIN / SENHA
 -----------------------
-URL de Acesso: http://127.0.0.1:5000/login
+URL de Acesso: /login
 Usuario: admin
 Senha:   fintrack2025
 
 GESTAO DA CHAVE DE API (Gemini)
 ---------------------------------
 A chave pode ser fornecida de duas formas:
-  1. Em tempo real: na pagina principal, campo "Chave da API Gemini"
+  1. Em tempo real: na pagina de extracao, campo "Chave da API Gemini"
      (enviada apenas na requisicao, nao armazenada em codigo)
   2. Via arquivo .env: definir GEMINI_API_KEY=sua_chave_aqui
      (arquivo excluido do repositorio pelo .gitignore)
 Obtencao da chave: https://aistudio.google.com/
 
-COMO EXECUTAR
---------------
+COMO EXECUTAR LOCALMENTE
+-------------------------
 1. Clonar o repositorio:
-   git clone https://github.com/Jubsvf/Leitor-de-PDF.git
+   git clone https://github.com/Jubsvf/Pagina-ADM---Financeiro.git
 
 2. Instalar dependencias:
    pip install -r requirements.txt
@@ -43,17 +55,21 @@ COMO EXECUTAR
    GEMINI_API_KEY=sua_chave_aqui
 
 4. Iniciar o servidor:
-   python server.py
+   python app.py
 
 5. Acessar no navegador:
    http://127.0.0.1:5000/login
 
+DEPLOY / HOSPEDAGEM
+--------------------
+- Configurado para Vercel Serverless via vercel.json e app.py.
+
 TECNOLOGIAS UTILIZADAS
 -----------------------
 - Python 3 / Flask
-- SQLAlchemy + SQLite (fallback) / PostgreSQL
-- Google Gemini API (google-genai)
+- SQLAlchemy + SQLite / PostgreSQL
+- Google Gemini API (google-genai) & pypdf
 - HTML, CSS, JavaScript Vanilla
-- Flasgger (Swagger UI)
+- Flasgger (Swagger UI na rota /apidocs)
 
 =============================================================

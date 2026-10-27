@@ -21,6 +21,7 @@ class Fornecedor(Base):
     razao_social = Column(String(255), nullable=False)
     nome_fantasia = Column(String(255), nullable=True)
     cnpj = Column(String(20), nullable=False, unique=True, index=True)
+    tipo = Column(String(20), default="FORNECEDOR", nullable=False)
     ativo = Column(Boolean, default=True, nullable=False)
     criado_em = Column(DateTime, default=datetime.datetime.utcnow)
     atualizado_em = Column(
@@ -37,6 +38,7 @@ class Fornecedor(Base):
             "razao_social": self.razao_social,
             "nome_fantasia": self.nome_fantasia or "",
             "cnpj": self.cnpj,
+            "tipo": self.tipo or "FORNECEDOR",
             "ativo": self.ativo,
             "criado_em": self.criado_em.isoformat() if self.criado_em else None,
             "atualizado_em": self.atualizado_em.isoformat() if self.atualizado_em else None,
@@ -50,6 +52,7 @@ class Cliente(Base):
     razao_social = Column(String(255), nullable=False)
     nome_fantasia = Column(String(255), nullable=True)
     cpf_cnpj = Column(String(20), nullable=False, unique=True, index=True)
+    tipo = Column(String(20), default="CLIENTE", nullable=False)
     ativo = Column(Boolean, default=True, nullable=False)
     criado_em = Column(DateTime, default=datetime.datetime.utcnow)
     atualizado_em = Column(
@@ -66,6 +69,7 @@ class Cliente(Base):
             "razao_social": self.razao_social,
             "nome_fantasia": self.nome_fantasia or "",
             "cpf_cnpj": self.cpf_cnpj,
+            "tipo": self.tipo or "CLIENTE",
             "ativo": self.ativo,
             "criado_em": self.criado_em.isoformat() if self.criado_em else None,
             "atualizado_em": self.atualizado_em.isoformat() if self.atualizado_em else None,
@@ -78,6 +82,7 @@ class Faturado(Base):
     id = Column(Integer, primary_key=True, index=True)
     nome_completo = Column(String(255), nullable=False)
     cpf = Column(String(20), nullable=False, unique=True, index=True)
+    tipo = Column(String(20), default="FATURADO", nullable=False)
     ativo = Column(Boolean, default=True, nullable=False)
     criado_em = Column(DateTime, default=datetime.datetime.utcnow)
     atualizado_em = Column(
@@ -89,11 +94,17 @@ class Faturado(Base):
     contas_a_pagar = relationship("ContaPagar", back_populates="faturado")
     contas_a_receber = relationship("ContaReceber", back_populates="faturado")
 
+    @property
+    def razao_social(self):
+        return self.nome_completo
+
     def to_dict(self):
         return {
             "id": self.id,
             "nome_completo": self.nome_completo,
+            "razao_social": self.nome_completo,
             "cpf": self.cpf,
+            "tipo": self.tipo or "FATURADO",
             "ativo": self.ativo,
             "criado_em": self.criado_em.isoformat() if self.criado_em else None,
             "atualizado_em": self.atualizado_em.isoformat() if self.atualizado_em else None,
@@ -105,6 +116,7 @@ class TipoReceita(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     descricao = Column(String(255), nullable=False, unique=True)
+    tipo = Column(String(20), default="RECEITA", nullable=False)
     ativo = Column(Boolean, default=True, nullable=False)
     criado_em = Column(DateTime, default=datetime.datetime.utcnow)
     atualizado_em = Column(
@@ -121,6 +133,7 @@ class TipoReceita(Base):
         return {
             "id": self.id,
             "descricao": self.descricao,
+            "tipo": self.tipo or "RECEITA",
             "ativo": self.ativo,
             "criado_em": self.criado_em.isoformat() if self.criado_em else None,
             "atualizado_em": self.atualizado_em.isoformat() if self.atualizado_em else None,
@@ -133,6 +146,7 @@ class TipoDespesa(Base):
     id = Column(Integer, primary_key=True, index=True)
     categoria = Column(String(100), nullable=False, index=True)
     descricao = Column(String(255), nullable=False)
+    tipo = Column(String(20), default="DESPESA", nullable=False)
     ativo = Column(Boolean, default=True, nullable=False)
     criado_em = Column(DateTime, default=datetime.datetime.utcnow)
     atualizado_em = Column(
@@ -150,6 +164,7 @@ class TipoDespesa(Base):
             "id": self.id,
             "categoria": self.categoria,
             "descricao": self.descricao,
+            "tipo": self.tipo or "DESPESA",
             "ativo": self.ativo,
             "criado_em": self.criado_em.isoformat() if self.criado_em else None,
             "atualizado_em": self.atualizado_em.isoformat() if self.atualizado_em else None,
@@ -167,6 +182,7 @@ class ContaPagar(Base):
     descricao_produtos = Column(Text, nullable=True)
     valor_total = Column(Numeric(15, 2), nullable=False)
     quantidade_parcelas = Column(Integer, default=1, nullable=False)
+    tipo = Column(String(20), default="APAGAR", nullable=False)
     ativo = Column(Boolean, default=True, nullable=False)
     criado_em = Column(DateTime, default=datetime.datetime.utcnow)
     atualizado_em = Column(
@@ -198,6 +214,7 @@ class ContaPagar(Base):
             "descricao_produtos": self.descricao_produtos or "",
             "valor_total": float(self.valor_total) if self.valor_total is not None else 0.0,
             "quantidade_parcelas": self.quantidade_parcelas,
+            "tipo": self.tipo or "APAGAR",
             "ativo": self.ativo,
             "parcelas": [p.to_dict() for p in self.parcelas],
             "classificacoes": [c.to_dict() for c in self.classificacoes],
@@ -212,6 +229,7 @@ class ParcelaPagar(Base):
     id = Column(Integer, primary_key=True, index=True)
     conta_pagar_id = Column(Integer, ForeignKey("contas_a_pagar.id"), nullable=False)
     numero_parcela = Column(Integer, default=1, nullable=False)
+    identificacao = Column(String(100), unique=True, index=True, nullable=False)
     data_vencimento = Column(Date, nullable=False)
     valor = Column(Numeric(15, 2), nullable=False)
     status = Column(String(30), default="PENDENTE", nullable=False)
@@ -224,6 +242,7 @@ class ParcelaPagar(Base):
             "id": self.id,
             "conta_pagar_id": self.conta_pagar_id,
             "numero_parcela": self.numero_parcela,
+            "identificacao": self.identificacao,
             "data_vencimento": self.data_vencimento.isoformat() if self.data_vencimento else None,
             "valor": float(self.valor) if self.valor is not None else 0.0,
             "status": self.status,
@@ -265,6 +284,7 @@ class ContaReceber(Base):
     descricao = Column(Text, nullable=True)
     valor_total = Column(Numeric(15, 2), nullable=False)
     quantidade_parcelas = Column(Integer, default=1, nullable=False)
+    tipo = Column(String(20), default="ARECEBER", nullable=False)
     ativo = Column(Boolean, default=True, nullable=False)
     criado_em = Column(DateTime, default=datetime.datetime.utcnow)
     atualizado_em = Column(
@@ -296,6 +316,7 @@ class ContaReceber(Base):
             "descricao": self.descricao or "",
             "valor_total": float(self.valor_total) if self.valor_total is not None else 0.0,
             "quantidade_parcelas": self.quantidade_parcelas,
+            "tipo": self.tipo or "ARECEBER",
             "ativo": self.ativo,
             "parcelas": [p.to_dict() for p in self.parcelas],
             "classificacoes": [c.to_dict() for c in self.classificacoes],
@@ -310,6 +331,7 @@ class ParcelaReceber(Base):
     id = Column(Integer, primary_key=True, index=True)
     conta_receber_id = Column(Integer, ForeignKey("contas_a_receber.id"), nullable=False)
     numero_parcela = Column(Integer, default=1, nullable=False)
+    identificacao = Column(String(100), unique=True, index=True, nullable=False)
     data_vencimento = Column(Date, nullable=False)
     valor = Column(Numeric(15, 2), nullable=False)
     status = Column(String(30), default="PENDENTE", nullable=False)
@@ -322,6 +344,7 @@ class ParcelaReceber(Base):
             "id": self.id,
             "conta_receber_id": self.conta_receber_id,
             "numero_parcela": self.numero_parcela,
+            "identificacao": self.identificacao,
             "data_vencimento": self.data_vencimento.isoformat() if self.data_vencimento else None,
             "valor": float(self.valor) if self.valor is not None else 0.0,
             "status": self.status,
@@ -350,3 +373,4 @@ class ClassificacaoContaReceber(Base):
             "percentual": float(self.percentual) if self.percentual is not None else 100.0,
             "valor": float(self.valor) if self.valor is not None else None,
         }
+

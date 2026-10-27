@@ -10,33 +10,24 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-container-wide">
-    <header class="header-section">
-      <h1 class="main-title">Sistema de Gestão Financeira</h1>
-      <p class="subtitle">Manter Tipos e Categorias de Receita</p>
-    </header>
+  <div class="app-layout">
+    {% include 'sidebar.html' %}
+    <main class="app-main-content">
+      <div class="app-container-wide">
+        <header class="header-section" style="text-align: left; margin-bottom: 8px;">
+          <h1 class="main-title">Tipos de Receita</h1>
+          <p class="subtitle">Manter tipos e classificações de receitas agrícolas</p>
+        </header>
 
-    <nav class="top-nav">
-      <a href="index.html" class="nav-link">Extração PDF</a>
-      <a href="fornecedores.html" class="nav-link">Fornecedores</a>
-      <a href="clientes.html" class="nav-link">Clientes</a>
-      <a href="faturados.html" class="nav-link">Faturados</a>
-      <a href="tipos-despesa.html" class="nav-link">Tipos Despesa</a>
-      <a href="tipos-receita.html" class="nav-link active">Tipos Receita</a>
-      <a href="contas-pagar.html" class="nav-link">Contas Pagar</a>
-      <a href="contas-receber.html" class="nav-link">Contas Receber</a>
-      <a href="/apidocs" target="_blank" class="nav-link" style="color: #2563eb;">Swagger API</a>
-    </nav>
+        <div id="alertBanner" class="alert-banner"></div>
 
-    <div id="alertBanner" class="alert-banner"></div>
-
-    <section class="card">
+    <section class="card" id="formTipoReceitaCard">
       <div class="card-header">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="12" y1="1" x2="12" y2="23"></line>
           <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
         </svg>
-        <span class="card-title">Novo Tipo de Receita</span>
+        <span class="card-title" id="formTipoReceitaTitle">Novo Tipo de Receita</span>
       </div>
       <div style="padding: 20px;">
         <form id="formTipoReceita">
@@ -46,10 +37,15 @@
               <input type="text" id="descricao" class="form-control" placeholder="Ex: Venda de Soja em Grãos Safra 2025" required>
             </div>
           </div>
-          <button type="submit" class="btn-action" style="max-width: 220px;">
-            Cadastrar Tipo de Receita
-          </button>
-          <div class="rule-note">Regra de negócio: Cadastros não podem ser excluídos. Registros podem ser inativados e reativados.</div>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button type="submit" class="btn-action" id="btnSubmitTipoReceita" style="max-width: 220px;">
+              Cadastrar Tipo de Receita
+            </button>
+            <button type="button" class="btn-sm" id="btnCancelarEdicaoTR" onclick="cancelarEdicaoTR()" style="display: none; padding: 10px 16px;">
+              Cancelar Edição
+            </button>
+          </div>
+          <div class="rule-note">Regra de negócio: Cadastros não podem ser excluídos fisicamente. Registros são inativados e podem ser reativados a qualquer momento.</div>
         </form>
       </div>
     </section>
@@ -96,8 +92,13 @@
 
   <script>
     const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '5000' ? 'http://127.0.0.1:5000' : '';
+    let trEmEdicao = null;
 
     function showAlert(msg, isError = false) {
+      if (typeof window.mostrarNotificacao === 'function') {
+        window.mostrarNotificacao(msg, isError ? 'erro' : 'sucesso');
+        return;
+      }
       const el = document.getElementById('alertBanner');
       if (!el) return;
       el.textContent = msg;
@@ -116,7 +117,9 @@
           tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748b;">Nenhum tipo de receita cadastrado.</td></tr>';
           return;
         }
-        tbody.innerHTML = dados.map(t => `
+        tbody.innerHTML = dados.map(t => {
+          const descEsc = (t.descricao || '').replace(/'/g, "\\'");
+          return `
           <tr>
             <td>#${t.id}</td>
             <td><strong>${t.descricao}</strong></td>
@@ -125,7 +128,8 @@
                 ${t.ativo ? 'ATIVO' : 'INATIVO'}
               </span>
             </td>
-            <td style="text-align: right;">
+            <td style="text-align: right; display: flex; gap: 4px; justify-content: flex-end;">
+              <button class="btn-sm" onclick="iniciarEdicaoTR(${t.id}, '${descEsc}')">Editar</button>
               ${t.ativo ? `
                 <button class="btn-sm btn-sm-danger" onclick="inativar(${t.id})">Inativar</button>
               ` : `
@@ -133,14 +137,31 @@
               `}
             </td>
           </tr>
-        `).join('');
+        `;}).join('');
       } catch (e) {
-        showAlert('Erro ao carregar tipos de receita do PostgreSQL', true);
+        showAlert('Erro ao carregar tipos de receita', true);
       }
     }
 
+    function iniciarEdicaoTR(id, desc) {
+      trEmEdicao = id;
+      document.getElementById('descricao').value = desc;
+      document.getElementById('formTipoReceitaTitle').textContent = `Editar Tipo de Receita #${id}`;
+      document.getElementById('btnSubmitTipoReceita').textContent = 'Salvar Alterações';
+      document.getElementById('btnCancelarEdicaoTR').style.display = 'inline-block';
+      document.getElementById('formTipoReceitaCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function cancelarEdicaoTR() {
+      trEmEdicao = null;
+      document.getElementById('formTipoReceita').reset();
+      document.getElementById('formTipoReceitaTitle').textContent = 'Novo Tipo de Receita';
+      document.getElementById('btnSubmitTipoReceita').textContent = 'Cadastrar Tipo de Receita';
+      document.getElementById('btnCancelarEdicaoTR').style.display = 'none';
+    }
+
     async function inativar(id) {
-      if (!confirm('Deseja realmente inativar este tipo de receita? (Cadastros não são excluídos fisicamente)')) return;
+      if (!confirm('Deseja inativar este tipo de receita? (Registros não são excluídos fisicamente para preservar o histórico financeiro)')) return;
       try {
         const res = await fetch(`${API_BASE}/api/tipos-receita/${id}/inativar`, { method: 'POST' });
         const data = await res.json();
@@ -175,27 +196,35 @@
       const payload = {
         descricao: document.getElementById('descricao').value,
       };
+
+      const url = trEmEdicao ? `${API_BASE}/api/tipos-receita/${trEmEdicao}` : `${API_BASE}/api/tipos-receita`;
+      const method = trEmEdicao ? 'PUT' : 'POST';
+
       try {
-        const res = await fetch(`${API_BASE}/api/tipos-receita`, {
-          method: 'POST',
+        const res = await fetch(url, {
+          method: method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (res.ok) {
-          showAlert('Tipo de receita cadastrado com sucesso no PostgreSQL!');
-          e.target.reset();
+          showAlert(trEmEdicao ? 'Tipo de receita atualizado com sucesso!' : 'Tipo de receita cadastrado com sucesso!');
+          cancelarEdicaoTR();
           carregarTiposReceita();
         } else {
-          showAlert(data.erro || 'Erro ao cadastrar', true);
+          showAlert(data.erro || 'Erro ao salvar tipo de receita', true);
         }
       } catch (err) {
-        showAlert('Erro de rede ao cadastrar', true);
+        showAlert('Erro de rede ao salvar', true);
       }
     });
 
     document.getElementById('filtroAtivo').addEventListener('change', carregarTiposReceita);
     carregarTiposReceita();
   </script>
+      </div>
+    </main>
+  </div>
+  <script src="toast.js"></script>
 </body>
 </html>

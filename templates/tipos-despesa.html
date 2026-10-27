@@ -10,33 +10,24 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-container-wide">
-    <header class="header-section">
-      <h1 class="main-title">Sistema de Gestão Financeira</h1>
-      <p class="subtitle">Manter Tipos e Categorias de Despesa</p>
-    </header>
+  <div class="app-layout">
+    {% include 'sidebar.html' %}
+    <main class="app-main-content">
+      <div class="app-container-wide">
+        <header class="header-section" style="text-align: left; margin-bottom: 8px;">
+          <h1 class="main-title">Tipos de Despesa</h1>
+          <p class="subtitle">Manter tipos e categorias de despesas agrícolas</p>
+        </header>
 
-    <nav class="top-nav">
-      <a href="index.html" class="nav-link">Extração PDF</a>
-      <a href="fornecedores.html" class="nav-link">Fornecedores</a>
-      <a href="clientes.html" class="nav-link">Clientes</a>
-      <a href="faturados.html" class="nav-link">Faturados</a>
-      <a href="tipos-despesa.html" class="nav-link active">Tipos Despesa</a>
-      <a href="tipos-receita.html" class="nav-link">Tipos Receita</a>
-      <a href="contas-pagar.html" class="nav-link">Contas Pagar</a>
-      <a href="contas-receber.html" class="nav-link">Contas Receber</a>
-      <a href="/apidocs" target="_blank" class="nav-link" style="color: #2563eb;">Swagger API</a>
-    </nav>
+        <div id="alertBanner" class="alert-banner"></div>
 
-    <div id="alertBanner" class="alert-banner"></div>
-
-    <section class="card">
+    <section class="card" id="formTipoDespesaCard">
       <div class="card-header">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
         </svg>
-        <span class="card-title">Novo Tipo / Categoria de Despesa</span>
+        <span class="card-title" id="formTipoDespesaTitle">Novo Tipo / Categoria de Despesa</span>
       </div>
       <div style="padding: 20px;">
         <form id="formTipoDespesa">
@@ -61,10 +52,15 @@
               <input type="text" id="descricao" class="form-control" placeholder="Ex: Peças, Parafusos, Componentes Mecânicos" required>
             </div>
           </div>
-          <button type="submit" class="btn-action" style="max-width: 220px;">
-            Cadastrar Tipo de Despesa
-          </button>
-          <div class="rule-note">Regra de negócio: Cadastros não podem ser excluídos. Registros podem ser inativados e reativados.</div>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button type="submit" class="btn-action" id="btnSubmitTipoDespesa" style="max-width: 220px;">
+              Cadastrar Tipo de Despesa
+            </button>
+            <button type="button" class="btn-sm" id="btnCancelarEdicaoTD" onclick="cancelarEdicaoTD()" style="display: none; padding: 10px 16px;">
+              Cancelar Edição
+            </button>
+          </div>
+          <div class="rule-note">Regra de negócio: Cadastros não podem ser excluídos fisicamente. Registros são inativados e podem ser reativados a qualquer momento.</div>
         </form>
       </div>
     </section>
@@ -112,8 +108,13 @@
 
   <script>
     const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '5000' ? 'http://127.0.0.1:5000' : '';
+    let tdEmEdicao = null;
 
     function showAlert(msg, isError = false) {
+      if (typeof window.mostrarNotificacao === 'function') {
+        window.mostrarNotificacao(msg, isError ? 'erro' : 'sucesso');
+        return;
+      }
       const el = document.getElementById('alertBanner');
       if (!el) return;
       el.textContent = msg;
@@ -132,7 +133,10 @@
           tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b;">Nenhum tipo de despesa cadastrado.</td></tr>';
           return;
         }
-        tbody.innerHTML = dados.map(t => `
+        tbody.innerHTML = dados.map(t => {
+          const catEsc = (t.categoria || '').replace(/'/g, "\\'");
+          const descEsc = (t.descricao || '').replace(/'/g, "\\'");
+          return `
           <tr>
             <td>#${t.id}</td>
             <td><strong>${t.categoria}</strong></td>
@@ -142,7 +146,8 @@
                 ${t.ativo ? 'ATIVO' : 'INATIVO'}
               </span>
             </td>
-            <td style="text-align: right;">
+            <td style="text-align: right; display: flex; gap: 4px; justify-content: flex-end;">
+              <button class="btn-sm" onclick="iniciarEdicaoTD(${t.id}, '${catEsc}', '${descEsc}')">Editar</button>
               ${t.ativo ? `
                 <button class="btn-sm btn-sm-danger" onclick="inativar(${t.id})">Inativar</button>
               ` : `
@@ -150,14 +155,32 @@
               `}
             </td>
           </tr>
-        `).join('');
+        `;}).join('');
       } catch (e) {
-        showAlert('Erro ao carregar tipos de despesa do PostgreSQL', true);
+        showAlert('Erro ao carregar tipos de despesa', true);
       }
     }
 
+    function iniciarEdicaoTD(id, cat, desc) {
+      tdEmEdicao = id;
+      document.getElementById('categoria').value = cat;
+      document.getElementById('descricao').value = desc;
+      document.getElementById('formTipoDespesaTitle').textContent = `Editar Tipo de Despesa #${id}`;
+      document.getElementById('btnSubmitTipoDespesa').textContent = 'Salvar Alterações';
+      document.getElementById('btnCancelarEdicaoTD').style.display = 'inline-block';
+      document.getElementById('formTipoDespesaCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function cancelarEdicaoTD() {
+      tdEmEdicao = null;
+      document.getElementById('formTipoDespesa').reset();
+      document.getElementById('formTipoDespesaTitle').textContent = 'Novo Tipo / Categoria de Despesa';
+      document.getElementById('btnSubmitTipoDespesa').textContent = 'Cadastrar Tipo de Despesa';
+      document.getElementById('btnCancelarEdicaoTD').style.display = 'none';
+    }
+
     async function inativar(id) {
-      if (!confirm('Deseja realmente inativar este tipo de despesa? (Cadastros não são excluídos fisicamente)')) return;
+      if (!confirm('Deseja inativar este tipo de despesa? (Registros não são excluídos fisicamente para preservar o histórico financeiro)')) return;
       try {
         const res = await fetch(`${API_BASE}/api/tipos-despesa/${id}/inativar`, { method: 'POST' });
         const data = await res.json();
@@ -193,27 +216,35 @@
         categoria: document.getElementById('categoria').value,
         descricao: document.getElementById('descricao').value,
       };
+
+      const url = tdEmEdicao ? `${API_BASE}/api/tipos-despesa/${tdEmEdicao}` : `${API_BASE}/api/tipos-despesa`;
+      const method = tdEmEdicao ? 'PUT' : 'POST';
+
       try {
-        const res = await fetch(`${API_BASE}/api/tipos-despesa`, {
-          method: 'POST',
+        const res = await fetch(url, {
+          method: method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (res.ok) {
-          showAlert('Tipo de despesa cadastrado com sucesso no PostgreSQL!');
-          e.target.reset();
+          showAlert(tdEmEdicao ? 'Tipo de despesa atualizado com sucesso!' : 'Tipo de despesa cadastrado com sucesso!');
+          cancelarEdicaoTD();
           carregarTiposDespesa();
         } else {
-          showAlert(data.erro || 'Erro ao cadastrar', true);
+          showAlert(data.erro || 'Erro ao salvar tipo de despesa', true);
         }
       } catch (err) {
-        showAlert('Erro de rede ao cadastrar', true);
+        showAlert('Erro de rede ao salvar', true);
       }
     });
 
     document.getElementById('filtroAtivo').addEventListener('change', carregarTiposDespesa);
     carregarTiposDespesa();
   </script>
+      </div>
+    </main>
+  </div>
+  <script src="toast.js"></script>
 </body>
 </html>
