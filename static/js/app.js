@@ -1,4 +1,13 @@
-// Elementos do DOM
+// ============================================================================
+// AGROFINANCEIRO N2 - APP.JS
+// Extração de Notas Fiscais e Integração com Inteligência Artificial (Gemini)
+// ============================================================================
+
+// Base da API (compatível com execução local na porta 5000 ou servidores estáticos)
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+  window.location.port !== '5000' && window.location.port !== '' ? 'http://127.0.0.1:5000' : '';
+
+// Elementos do DOM - Upload de PDF
 const pdfInput = document.getElementById('pdfInput');
 const fileStatusText = document.getElementById('fileStatusText');
 const fileInfoBox = document.getElementById('fileInfoBox');
@@ -6,15 +15,32 @@ const fileNameEl = document.getElementById('fileName');
 const fileSizeEl = document.getElementById('fileSize');
 const btnRemoveFile = document.getElementById('btnRemoveFile');
 const btnExtract = document.getElementById('btnExtract');
+const btnText = document.getElementById('btnText');
+const extractStatusBox = document.getElementById('extractStatusBox');
+const extractStatusText = document.getElementById('extractStatusText');
 
-// Elementos da Chave API Gemini
+// Elementos do DOM - Chave da API Gemini
 const apiKeyInput = document.getElementById('apiKeyInput');
 const btnAplicarChave = document.getElementById('btnAplicarChave');
 const btnToggleKey = document.getElementById('btnToggleKey');
 const keyStatusBadge = document.getElementById('keyStatusBadge');
 
+// Elementos do DOM - Análise e Resultados
+const analysisCard = document.getElementById('analysisCard');
+const confirmationCard = document.getElementById('confirmationCard');
+const confirmationList = document.getElementById('confirmationList');
+const resultCard = document.getElementById('resultCard');
+const jsonResult = document.getElementById('jsonResult');
+const btnProcessarLancamento = document.getElementById('btnProcessarLancamento');
+const btnProcessarText = document.getElementById('btnProcessarText');
+
+// Ícones SVG para alternar visibilidade de chave (sem emojis)
+const SVG_EYE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+const SVG_EYE_OFF = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+
 // Estado da Aplicação
 let selectedFile = null;
+let ultimoResultadoExtracao = null;
 
 // Formatação do tamanho do arquivo (KB/MB)
 function formatFileSize(bytes) {
@@ -25,18 +51,54 @@ function formatFileSize(bytes) {
   return mb.toFixed(2) + ' MB';
 }
 
+// Formatação monetária BRL
+function formatBRL(val) {
+  const num = parseFloat(val) || 0;
+  return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+// Disparo de notificações visuais (via toast ou alert fallback)
 function notificar(mensagem, tipo = 'info') {
   if (typeof window.mostrarNotificacao === 'function') {
     window.mostrarNotificacao(mensagem, tipo);
+  } else if (window.toast && typeof window.toast[tipo] === 'function') {
+    window.toast[tipo](mensagem);
   } else {
     alert(mensagem);
   }
 }
 
+// Feedback visual do status da extração
+function setStatusExtracao(ativo, mensagem = '') {
+  if (extractStatusBox) {
+    if (ativo) {
+      extractStatusBox.classList.remove('hidden');
+      if (extractStatusText) extractStatusText.textContent = mensagem;
+    } else {
+      extractStatusBox.classList.add('hidden');
+    }
+  }
+}
+
+// Reset da seleção de arquivo
+function resetFileSelection() {
+  selectedFile = null;
+  ultimoResultadoExtracao = null;
+  if (pdfInput) pdfInput.value = '';
+  if (fileInfoBox) fileInfoBox.classList.add('hidden');
+  if (fileStatusText) fileStatusText.textContent = 'Nenhum arquivo escolhido';
+  if (btnExtract) btnExtract.disabled = true;
+  if (analysisCard) analysisCard.classList.add('hidden');
+  if (confirmationCard) confirmationCard.classList.add('hidden');
+  if (resultCard) resultCard.classList.add('hidden');
+  if (btnText) btnText.textContent = 'Extrair Dados';
+  setStatusExtracao(false);
+}
+
 // Manipulação da seleção de arquivo PDF
 if (pdfInput) {
   pdfInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files && e.target.files[0];
     if (file) {
       if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
         notificar('Por favor, selecione um arquivo no formato PDF.', 'aviso');
@@ -44,78 +106,27 @@ if (pdfInput) {
         return;
       }
 
-    selectedFile = file;
-    fileNameEl.textContent = file.name;
-    fileSizeEl.textContent = formatFileSize(file.size);
+      selectedFile = file;
+      if (fileNameEl) fileNameEl.textContent = file.name;
+      if (fileSizeEl) fileSizeEl.textContent = formatFileSize(file.size);
 
-    fileInfoBox.classList.remove('hidden');
-    fileStatusText.textContent = '';
-    btnExtract.disabled = false;
-  } else {
-    resetFileSelection();
-  }
-});
+      if (fileInfoBox) fileInfoBox.classList.remove('hidden');
+      if (fileStatusText) fileStatusText.textContent = '';
+      if (btnExtract) btnExtract.disabled = false;
+    } else {
+      resetFileSelection();
+    }
+  });
+}
 
 // Remover arquivo selecionado
-btnRemoveFile.addEventListener('click', () => {
-  resetFileSelection();
-});
-
-const resultCard = document.getElementById('resultCard');
-const jsonResult = document.getElementById('jsonResult');
-const btnSalvarConta = document.getElementById('btnSalvarConta');
-const btnText = document.getElementById('btnText');
-
-// Aponta para o backend Flask (porta 5000) caso aberto via Live Server (porta 5500) localmente
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '5000' ? 'http://127.0.0.1:5000' : '';
-
-let ultimoResultadoExtracao = null;
-
-// Elementos da Segunda Etapa (Análise no Banco)
-const analysisCard = document.getElementById('analysisCard');
-const summaryNumeroNf = document.getElementById('summaryNumeroNf');
-const summaryDataEmissao = document.getElementById('summaryDataEmissao');
-const summaryDataVencimento = document.getElementById('summaryDataVencimento');
-const summaryValorTotal = document.getElementById('summaryValorTotal');
-
-const analysisFornecedorNome = document.getElementById('analysisFornecedorNome');
-const analysisFornecedorDoc = document.getElementById('analysisFornecedorDoc');
-const fornecedorStatusBadge = document.getElementById('fornecedorStatusBadge');
-
-const analysisFaturadoNome = document.getElementById('analysisFaturadoNome');
-const analysisFaturadoDoc = document.getElementById('analysisFaturadoDoc');
-const faturadoStatusBadge = document.getElementById('faturadoStatusBadge');
-
-const analysisDespesaNome = document.getElementById('analysisDespesaNome');
-const despesaStatusBadge = document.getElementById('despesaStatusBadge');
-
-const btnProcessarLancamento = document.getElementById('btnProcessarLancamento');
-const btnProcessarText = document.getElementById('btnProcessarText');
-
-const confirmationCard = document.getElementById('confirmationCard');
-const confirmationList = document.getElementById('confirmationList');
-
-// Formatação monetária BRL
-function formatBRL(val) {
-  const num = parseFloat(val) || 0;
-  return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+if (btnRemoveFile) {
+  btnRemoveFile.addEventListener('click', () => {
+    resetFileSelection();
+  });
 }
 
-// Reset da seleção
-function resetFileSelection() {
-  selectedFile = null;
-  ultimoResultadoExtracao = null;
-  pdfInput.value = '';
-  fileInfoBox.classList.add('hidden');
-  fileStatusText.textContent = 'Nenhum arquivo escolhido';
-  btnExtract.disabled = true;
-  if (analysisCard) analysisCard.classList.add('hidden');
-  if (confirmationCard) confirmationCard.classList.add('hidden');
-  if (resultCard) resultCard.classList.add('hidden');
-  if (btnText) btnText.textContent = 'EXTRAIR DADOS';
-}
-
-// Renderização dos resultados da Segunda Etapa
+// Renderização dos resultados da Segunda Etapa (Entidades e Relacionamento no Banco)
 function renderizarAnalise(analise) {
   if (!analise || !analysisCard) return;
 
@@ -124,49 +135,72 @@ function renderizarAnalise(analise) {
   const desp = analise.classificacao || {};
   const extraidos = analise.dados_extraidos || {};
 
-  // Resumo
-  if (summaryNumeroNf) summaryNumeroNf.textContent = extraidos.numero_nf || 'S/N';
-  if (summaryDataEmissao) summaryDataEmissao.textContent = extraidos.data_emissao || '-';
-  if (summaryDataVencimento) summaryDataVencimento.textContent = extraidos.data_vencimento || extraidos.data_emissao || '-';
-  if (summaryValorTotal) summaryValorTotal.textContent = formatBRL(extraidos.valor_total);
+  // Resumo de Metadados da Nota Fiscal
+  const elNumNf = document.getElementById('metaNumeroNf') || document.getElementById('summaryNumeroNf');
+  if (elNumNf) elNumNf.textContent = extraidos.numero_nf || 'S/N';
 
-  // 1. Fornecedor
-  if (analysisFornecedorNome) analysisFornecedorNome.textContent = forn.nome || 'Não identificado';
-  if (analysisFornecedorDoc) analysisFornecedorDoc.textContent = forn.documento ? `CNPJ: ${forn.documento}` : 'CNPJ não informado';
-  if (fornecedorStatusBadge) {
+  const elDtEmissao = document.getElementById('metaDataEmissao') || document.getElementById('summaryDataEmissao');
+  if (elDtEmissao) elDtEmissao.textContent = extraidos.data_emissao || '-';
+
+  const elValTotal = document.getElementById('metaValorTotal') || document.getElementById('summaryValorTotal');
+  if (elValTotal) elValTotal.textContent = formatBRL(extraidos.valor_total);
+
+  const elParcelas = document.getElementById('metaParcelas') || document.getElementById('summaryDataVencimento');
+  if (elParcelas) {
+    elParcelas.textContent = extraidos.data_vencimento ? `Venc: ${extraidos.data_vencimento}` : (extraidos.data_emissao || '1x à vista');
+  }
+
+  // 1. Fornecedor (Emitente)
+  const elStatusForn = document.getElementById('statusFornecedor') || document.getElementById('fornecedorStatusBadge');
+  if (elStatusForn) {
     if (forn.existe) {
-      fornecedorStatusBadge.className = 'status-badge-exists';
-      fornecedorStatusBadge.textContent = forn.situacao || `EXISTE — ID: ${forn.id}`;
+      elStatusForn.className = 'status-badge-exists';
+      elStatusForn.textContent = forn.situacao || `EXISTE — ID: ${forn.id}`;
     } else {
-      fornecedorStatusBadge.className = 'status-badge-missing';
-      fornecedorStatusBadge.textContent = 'NÃO EXISTE';
+      elStatusForn.className = 'status-badge-missing';
+      elStatusForn.textContent = 'NÃO EXISTE (SERÁ CRIADO)';
     }
   }
+  const elDetForn = document.getElementById('detalhesFornecedor') || document.getElementById('analysisFornecedorNome');
+  if (elDetForn) {
+    elDetForn.innerHTML = `<strong>${forn.nome || 'Não identificado'}</strong><br><span style="font-family: monospace; font-size: 11px;">${forn.documento ? `CNPJ: ${forn.documento}` : 'CNPJ não informado'}</span>`;
+  }
 
-  // 2. Faturado
-  if (analysisFaturadoNome) analysisFaturadoNome.textContent = fat.nome || 'Não identificado';
-  if (analysisFaturadoDoc) analysisFaturadoDoc.textContent = fat.documento ? `CPF/CNPJ: ${fat.documento}` : 'Documento não informado';
-  if (faturadoStatusBadge) {
+  // 2. Faturado (Destinatário)
+  const elStatusFat = document.getElementById('statusFaturado') || document.getElementById('faturadoStatusBadge');
+  if (elStatusFat) {
     if (fat.existe) {
-      faturadoStatusBadge.className = 'status-badge-exists';
-      faturadoStatusBadge.textContent = fat.situacao || `EXISTE — ID: ${fat.id}`;
+      elStatusFat.className = 'status-badge-exists';
+      elStatusFat.textContent = fat.situacao || `EXISTE — ID: ${fat.id}`;
     } else {
-      faturadoStatusBadge.className = 'status-badge-missing';
-      faturadoStatusBadge.textContent = 'NÃO EXISTE';
+      elStatusFat.className = 'status-badge-missing';
+      elStatusFat.textContent = 'NÃO EXISTE (SERÁ CRIADO)';
     }
+  }
+  const elDetFat = document.getElementById('detalhesFaturado') || document.getElementById('analysisFaturadoNome');
+  if (elDetFat) {
+    elDetFat.innerHTML = `<strong>${fat.nome || 'Não identificado'}</strong><br><span style="font-family: monospace; font-size: 11px;">${fat.documento ? `CPF/CNPJ: ${fat.documento}` : 'Documento não informado'}</span>`;
   }
 
-  // 3. Despesa
-  if (analysisDespesaNome) analysisDespesaNome.textContent = desp.descricao || 'MANUTENÇÃO E OPERAÇÃO';
-  if (despesaStatusBadge) {
+  // 3. Classificação da Despesa
+  const elStatusDesp = document.getElementById('statusClassificacao') || document.getElementById('despesaStatusBadge');
+  if (elStatusDesp) {
     if (desp.existe) {
-      despesaStatusBadge.className = 'status-badge-exists';
-      despesaStatusBadge.textContent = desp.situacao || `EXISTE — ID: ${desp.id}`;
+      elStatusDesp.className = 'status-badge-exists';
+      elStatusDesp.textContent = desp.situacao || `EXISTE — ID: ${desp.id}`;
     } else {
-      despesaStatusBadge.className = 'status-badge-missing';
-      despesaStatusBadge.textContent = 'NÃO EXISTE';
+      elStatusDesp.className = 'status-badge-missing';
+      elStatusDesp.textContent = 'NÃO EXISTE (SERÁ CRIADA)';
     }
   }
+  const elDetDesp = document.getElementById('detalhesClassificacao') || document.getElementById('analysisDespesaNome');
+  if (elDetDesp) {
+    elDetDesp.innerHTML = `<strong>${desp.descricao || 'MANUTENÇÃO E OPERAÇÃO'}</strong>`;
+  }
+
+  // Badge no cabeçalho do card
+  const analysisBadge = document.getElementById('analysisBadge');
+  if (analysisBadge) analysisBadge.style.display = 'inline-block';
 
   analysisCard.classList.remove('hidden');
   if (confirmationCard) confirmationCard.classList.add('hidden');
@@ -174,71 +208,84 @@ function renderizarAnalise(analise) {
 }
 
 // Acionamento do Agente de IA para Extração dos Dados + Execução da Segunda Etapa
-btnExtract.addEventListener('click', async () => {
-  if (!selectedFile) return;
-
-  const originalText = btnText ? btnText.textContent : 'EXTRAIR DADOS';
-  if (btnText) btnText.textContent = 'PROCESSANDO COM IA...';
-  btnExtract.disabled = true;
-
-  try {
-    const formData = new FormData();
-    formData.append('pdf', selectedFile);
-    if (apiKeyInput && apiKeyInput.value.trim()) {
-      formData.append('api_key', apiKeyInput.value.trim());
+if (btnExtract) {
+  btnExtract.addEventListener('click', async () => {
+    if (!selectedFile) {
+      notificar('Por favor, selecione um arquivo PDF antes de extrair.', 'aviso');
+      return;
     }
 
-    // Etapa 1: Extrair dados da NF em PDF
-    const response = await fetch(`${API_BASE}/api/extrair-pdf`, {
-      method: 'POST',
-      body: formData,
-    });
+    const originalText = btnText ? btnText.textContent : 'Extrair Dados';
+    if (btnText) btnText.textContent = 'PROCESSANDO COM IA...';
+    btnExtract.disabled = true;
+    setStatusExtracao(true, 'Lendo páginas do PDF e extraindo com IA Gemini...');
 
-    const responseText = await response.text();
-    let dados;
     try {
-      dados = JSON.parse(responseText);
-    } catch (parseErr) {
-      throw new Error(`Resposta do servidor não é um JSON válido: ${responseText.substring(0, 100)}`);
+      const formData = new FormData();
+      formData.append('pdf', selectedFile);
+
+      // Envia a chave atual informada no input ou gravada em sessionStorage
+      const chaveAtual = (apiKeyInput && apiKeyInput.value.trim()) || sessionStorage.getItem('gemini_api_key') || '';
+      if (chaveAtual) {
+        formData.append('api_key', chaveAtual);
+      }
+
+      // Etapa 1: Extrair dados da NF em PDF
+      const response = await fetch(`${API_BASE}/api/extrair-pdf`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const responseText = await response.text();
+      let dados;
+      try {
+        dados = JSON.parse(responseText);
+      } catch (parseErr) {
+        throw new Error(`Resposta do servidor não é um JSON válido: ${responseText.substring(0, 100)}`);
+      }
+
+      if (!response.ok) {
+        throw new Error(dados.erro || `Falha na requisição (Status ${response.status}).`);
+      }
+
+      ultimoResultadoExtracao = dados;
+
+      if (jsonResult) {
+        jsonResult.textContent = JSON.stringify(dados, null, 2);
+      }
+      if (resultCard) {
+        resultCard.classList.remove('hidden');
+      }
+
+      // Etapa 2: Análise dos dados extraídos no banco de dados
+      if (btnText) btnText.textContent = 'ANALISANDO NO BANCO...';
+      setStatusExtracao(true, 'Consultando banco de dados para Fornecedor, Faturado e Classificação...');
+
+      const analiseRes = await fetch(`${API_BASE}/api/analisar-dados-extracao`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados),
+      });
+
+      if (!analiseRes.ok) {
+        const errData = await analiseRes.json();
+        throw new Error(errData.erro || 'Falha ao analisar dados no banco.');
+      }
+
+      const analiseData = await analiseRes.json();
+      renderizarAnalise(analiseData);
+      notificar('Dados extraídos e analisados com sucesso!', 'sucesso');
+
+    } catch (error) {
+      console.error('Erro na extração/análise:', error);
+      notificar('Erro ao processar dados da nota fiscal: ' + error.message, 'erro');
+    } finally {
+      if (btnText) btnText.textContent = originalText;
+      btnExtract.disabled = false;
+      setStatusExtracao(false);
     }
-
-    if (!response.ok) {
-      throw new Error(dados.erro || `Falha na requisição (Status ${response.status}).`);
-    }
-
-    ultimoResultadoExtracao = dados;
-
-    if (jsonResult) {
-      jsonResult.textContent = JSON.stringify(dados, null, 2);
-    }
-    if (resultCard) {
-      resultCard.classList.remove('hidden');
-    }
-
-    // Etapa 2: Análise dos dados extraídos no banco de dados
-    if (btnText) btnText.textContent = 'ANALISANDO NO BANCO...';
-    const analiseRes = await fetch(`${API_BASE}/api/analisar-dados-extracao`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(dados),
-    });
-
-    if (!analiseRes.ok) {
-      const errData = await analiseRes.json();
-      throw new Error(errData.erro || 'Falha ao analisar dados no banco.');
-    }
-
-    const analiseData = await analiseRes.json();
-    renderizarAnalise(analiseData);
-
-  } catch (error) {
-    console.error('Erro na extração/análise:', error);
-    notificar('Erro ao processar dados da nota fiscal: ' + error.message, 'erro');
-  } finally {
-    if (btnText) btnText.textContent = originalText;
-    btnExtract.disabled = false;
-  }
-});
+  });
+}
 
 // Ação do Botão: Processar e Registrar Lançamento pós-análise
 if (btnProcessarLancamento) {
@@ -248,7 +295,7 @@ if (btnProcessarLancamento) {
       return;
     }
 
-    const origTxt = btnProcessarText ? btnProcessarText.textContent : 'CONFIRMAR E PROCESSAR LANÇAMENTO';
+    const origTxt = btnProcessarText ? btnProcessarText.textContent : 'Confirmar e Processar Lançamento';
     try {
       btnProcessarLancamento.disabled = true;
       if (btnProcessarText) btnProcessarText.textContent = 'PERSISTINDO NO BANCO...';
@@ -281,6 +328,7 @@ if (btnProcessarLancamento) {
         confirmationCard.classList.remove('hidden');
         confirmationCard.scrollIntoView({ behavior: 'smooth' });
       }
+      notificar('Lançamento e parcelas persistidos no banco de dados com sucesso!', 'sucesso');
 
     } catch (err) {
       console.error('Erro ao processar lançamento:', err);
@@ -309,7 +357,7 @@ function atualizarBadgeStatusChave(configurada) {
   } else {
     keyStatusBadge.style.background = '#fee2e2';
     keyStatusBadge.style.color = '#991b1b';
-    keyStatusBadge.textContent = 'Não configurada';
+    keyStatusBadge.textContent = 'Não ativa';
     if (apiKeyInput && !apiKeyInput.value) {
       apiKeyInput.placeholder = 'Cole sua chave Gemini aqui e clique em Aplicar';
     }
@@ -318,7 +366,7 @@ function atualizarBadgeStatusChave(configurada) {
 
 async function verificarStatusChave() {
   if (!keyStatusBadge) return;
-  
+
   // 1. Restaurar chave salva no sessionStorage se existir
   const salva = sessionStorage.getItem('gemini_api_key');
   if (salva && apiKeyInput && !apiKeyInput.value) {
@@ -398,18 +446,13 @@ if (btnAplicarChave) {
   });
 }
 
-// Botão Visualizar / Esconder Chave
+// Botão Visualizar / Esconder Chave (Ícones SVG profissionais, sem emojis)
 if (btnToggleKey && apiKeyInput) {
   btnToggleKey.addEventListener('click', () => {
-    if (apiKeyInput.type === 'password') {
-      apiKeyInput.type = 'text';
-      btnToggleKey.textContent = '🙈';
-      btnToggleKey.title = 'Esconder chave';
-    } else {
-      apiKeyInput.type = 'password';
-      btnToggleKey.textContent = '👁';
-      btnToggleKey.title = 'Mostrar chave';
-    }
+    const isPassword = apiKeyInput.type === 'password';
+    apiKeyInput.type = isPassword ? 'text' : 'password';
+    btnToggleKey.title = isPassword ? 'Ocultar chave' : 'Mostrar chave';
+    btnToggleKey.innerHTML = isPassword ? SVG_EYE_OFF : SVG_EYE;
   });
 }
 
@@ -423,26 +466,21 @@ if (apiKeyInput && btnAplicarChave) {
   });
 }
 
-// Carregar versão no rodapé
+// Carregar versão no rodapé da sidebar
 async function carregarVersao() {
-  const versionLink = document.getElementById('versionLink');
+  const versionLink = document.getElementById('sidebarGitHash');
   if (!versionLink) return;
   try {
     const res = await fetch(`${API_BASE}/api/version`);
     if (res.ok) {
       const data = await res.json();
-      versionLink.textContent = data.commit_short || data.commit || 'v2.0.0';
-      if (data.link_commit) {
-        versionLink.href = data.link_commit;
-      }
-    } else {
-      versionLink.textContent = 'v2.0.0';
+      versionLink.textContent = data.commit_short || '12c68a';
     }
   } catch (e) {
-    versionLink.textContent = 'v2.0.0';
+    // Silencioso em caso de falha de rede
   }
 }
 
-// Inicializações ao carregar a página
+// Inicializações ao carregar o script
 verificarStatusChave();
 carregarVersao();

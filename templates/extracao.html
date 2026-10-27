@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
   <div class="app-layout">
@@ -181,8 +181,12 @@
             <button type="button" id="btnAplicarChave" style="padding: 8px 16px; background: #0f172a; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-family: inherit; cursor: pointer; white-space: nowrap;">
               Aplicar Chave
             </button>
-            <button type="button" id="btnToggleKey" title="Mostrar/esconder chave" style="padding: 8px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 13px;">
-              👁
+            <button type="button" id="btnToggleKey" title="Mostrar ou ocultar chave" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; color: #475569;" aria-label="Mostrar ou ocultar chave">
+              <svg id="iconEye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="3" r="3" style="display:none;"></circle>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
             </button>
           </div>
           <p style="padding: 0 16px 12px; font-size: 11px; color: #64748b; margin: 0;">
@@ -235,6 +239,15 @@
               </svg>
               <span id="btnText">Extrair Dados</span>
             </button>
+
+            <!-- Feedback visual em tempo real do processamento -->
+            <div id="extractStatusBox" class="hidden" style="margin-top: 12px; padding: 12px 16px; border-radius: 8px; font-size: 13px; display: flex; align-items: center; gap: 10px; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; animation: spin 1s linear infinite; flex-shrink: 0;">
+                <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+                <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
+              </svg>
+              <span id="extractStatusText">Processando documento com IA Gemini... Aguarde um instante.</span>
+            </div>
           </div>
         </section>
 
@@ -337,7 +350,7 @@
     </main>
   </div>
 
-  <script src="toast.js"></script>
-  <script src="app.js"></script>
+  <script src="/static/js/toast.js?v=2.0.2"></script>
+  <script src="/static/js/app.js?v=2.0.2"></script>
 </body>
 </html>

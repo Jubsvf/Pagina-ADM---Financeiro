@@ -538,6 +538,22 @@ def configurar_chave():
         return jsonify({"erro": "Campo 'api_key' não informado ou vazio."}), 400
     _runtime_api_key = chave
     os.environ["GEMINI_API_KEY"] = chave
+    try:
+        env_path = os.path.join(os.path.dirname(__file__), ".env")
+        if os.path.exists(env_path):
+            with open(env_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            if "GEMINI_API_KEY=" in content:
+                content = re.sub(r"GEMINI_API_KEY=.*", f"GEMINI_API_KEY={chave}", content)
+            else:
+                content += f"\nGEMINI_API_KEY={chave}\n"
+            with open(env_path, "w", encoding="utf-8") as f:
+                f.write(content)
+        else:
+            with open(env_path, "w", encoding="utf-8") as f:
+                f.write(f"GEMINI_API_KEY={chave}\n")
+    except Exception as e:
+        print(f"Aviso ao persistir chave no .env: {e}")
     return jsonify({"mensagem": "Chave da API Gemini configurada com sucesso.", "status": "ok"})
 
 

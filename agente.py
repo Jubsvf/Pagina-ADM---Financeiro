@@ -242,6 +242,20 @@ class Agente:
         Extrai informações de notas fiscais utilizando Gemini ou fallback heurístico.
         Retorna estritamente o JSON com as chaves padronizadas.
         """
+        pdf_bytes = None
+        try:
+            if hasattr(pdf_file, "read"):
+                pdf_file.seek(0)
+                pdf_bytes = pdf_file.read()
+                pdf_file.seek(0)
+            elif isinstance(pdf_file, (bytes, bytearray)):
+                pdf_bytes = bytes(pdf_file)
+            elif isinstance(pdf_file, (str, os.PathLike)) and os.path.exists(pdf_file):
+                with open(pdf_file, "rb") as f:
+                    pdf_bytes = f.read()
+        except Exception:
+            pdf_bytes = None
+
         texto_pdf = self._extrair_texto_pdf(pdf_file)
 
         if not prompt:
@@ -293,12 +307,24 @@ class Agente:
                 
                 conteudo_prompt = f"{prompt}\n\n--- TEXTO EXTRAÍDO DA NOTA FISCAL (TODAS AS PÁGINAS) ---\n{texto_pdf}"
                 
-                # Lista de modelos por ordem de preferência e resiliência
+                # Se o texto extraído for muito curto (ex: PDF digitalizado/escaneado), tenta enviar os bytes do PDF
+                contents = [conteudo_prompt]
+                if pdf_bytes and len(texto_pdf.strip()) < 50:
+                    try:
+                        contents = [
+                            prompt,
+                            types.Part.from_bytes(data=pdf_bytes, mime_type="application/pdf")
+                        ]
+                    except Exception:
+                        contents = [conteudo_prompt]
+
+                # Lista de modelos por ordem de preferência, velocidade e resiliência
                 modelos_tentativa = [
-                    "gemini-2.5-flash",
+                    "gemini-flash-lite-latest",
+                    "gemini-3.5-flash-lite",
                     "gemini-flash-latest",
-                    "gemini-3.5-flash",
-                    "gemini-3.6-flash"
+                    "gemini-3.8-flash",
+                    "gemini-3.7-flash",
                 ]
                 response = None
                 ultimo_erro = None
@@ -307,7 +333,7 @@ class Agente:
                     try:
                         response = client.models.generate_content(
                             model=mod,
-                            contents=conteudo_prompt,
+                            contents=contents,
                             config=types.GenerateContentConfig(
                                 response_mime_type="application/json"
                             )
@@ -326,8 +352,20 @@ class Agente:
                 if resposta_texto.startswith("```"):
                     resposta_texto = re.sub(r"^```[a-zA-Z]*\n?", "", resposta_texto)
                     resposta_texto = re.sub(r"\n?```$", "", resposta_texto).strip()
+                elif "```" in resposta_texto:
+                    match_fence = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", resposta_texto)
+                    if match_fence:
+                        resposta_texto = match_fence.group(1).strip()
 
-                dados = json.loads(resposta_texto)
+                try:
+                    dados = json.loads(resposta_texto)
+                except Exception:
+                    match_json = re.search(r"\{[\s\S]*\}", resposta_texto)
+                    if match_json:
+                        dados = json.loads(match_json.group(0))
+                    else:
+                        raise
+
                 return self._normalizar_json(dados, texto_pdf)
             except Exception as e:
                 print(f"Aviso: Erro ao chamar API Gemini ({e}). Utilizando motor de contingência.")
